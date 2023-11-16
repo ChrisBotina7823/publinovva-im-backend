@@ -15,9 +15,9 @@
 | --------------- | ------- | ------------------------------------------------ |
 | entity_name     | String  | NN                                               |
 | deposit_address | String  | NN                                               |
-| deposit_qr      | String  | NN                                               |
+| deposit_qr      | String  | DF=""                                                 | 
 | available_days  | Integer | NN, DF=0, AUTO SCH                               |
-| account_state   | String  | NN, DF="activo", values:{"activo", "suspendido"} | 
+| account_state   | String  | NN, DF="activo", values:{"activo", "suspendido"} |
 
 #### User <- Client
 
@@ -98,11 +98,18 @@
 
 # Routes
 
+## Auth
+
+| route            | auth | method | description       |
+| ---------------- | ---- | ------ | ----------------- |
+| /auth/superuser/ | none | POST   | superuser sign in |
+| /auth/admin/     | none | POST   | admin sign in     |
+| /auth/customer/  | none | POST   | customer sign in  | 
+
 ### Users
 
 | route             | auth      | method | description                    |
 | ----------------- | --------- | ------ | ------------------------------ |
-| /auth/superusers/ | none      | POST   | login user                     |
 | /users/:id        | depending | PUT    | edit user base profile     |
 | /users/           | superuser | POST   | add a new superuser            |
 | /profile          | depending | GET    | get user's profile information |
