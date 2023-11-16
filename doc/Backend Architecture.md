@@ -21,12 +21,13 @@
 
 #### User <- Client
 
-| attribute     | type   | extra                                                               |
-| ------------- | ------ | ------------------------------------------------------------------- |
-| fullname      | String | NN                                                                  |
-| country       | String | NN                                                                  |
-| phone         | String | NN                                                                  |
-| account_state | String | NN, DF:"en revision", values:{"en revisión", "activo", "suspendido"} | 
+| attribute     | type    | extra                                                                |     |
+| ------------- | ------- | -------------------------------------------------------------------- | --- |
+| fullname      | String  | NN                                                                   |     |
+| country       | String  | NN                                                                   |     |
+| phone         | String  | NN                                                                   |     |
+| account_state | String  | NN, DF:"en revision", values:{"en revisión", "activo", "suspendido"} |     |
+| admin_id      | Integer | FK                                                                   |     | 
 
 ### Package
 

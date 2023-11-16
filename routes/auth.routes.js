@@ -7,10 +7,14 @@ router.post('/', async (req, res) => {
     try {
         const { username, password } = req.body
         const token = await userSignIn({username, password})
-        res.json(token)
+        if(token) {
+            res.json(token)
+        } else {
+            res.status(401).json(`Access denied for ${username}`)
+        }
     } catch(err) {
-        console.error("Invalid request")
-        res.send()
+        console.error(err)
+        res.status(400).json(`Error in logging in request: ${err.message}`)
     }
 })
 
