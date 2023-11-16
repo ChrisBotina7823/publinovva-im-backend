@@ -1,5 +1,5 @@
-DROP TABLE admins;
 DROP TABLE clients;
+DROP TABLE admins;
 DROP TABLE users;
 
 CREATE TABLE users (
@@ -26,5 +26,7 @@ CREATE TABLE clients (
     country VARCHAR(127) NOT NULL,
     phone VARCHAR(127) NOT NULL,
     account_state VARCHAR(127) NOT NULL DEFAULT 'en revision',
-    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+    admin_username VARCHAR(127) NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (admin_username) REFERENCES admins(username) ON DELETE CASCADE
 );

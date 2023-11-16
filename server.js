@@ -13,9 +13,13 @@ app.use(bodyParser.urlencoded({extended:true}))
 import indexRouter from './routes/index.routes.js'
 import authRouter from './routes/auth.routes.js'
 import usersRouter from './routes/users.routes.js'
+import clientsRouter from './routes/clients.routes.js'
+import adminsRouter from './routes/admins.routes.js'
 app.use(indexRouter)
 app.use('/auth/', authRouter)
 app.use('/users/', usersRouter)
+app.use('/clients/', clientsRouter)
+app.use('/admins/', adminsRouter)
 
 // Set server to port
 app.listen(PORT, () => {
