@@ -1,32 +1,33 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import { getUserByUsername, getAdminByUsername, getClientByUsername } from '../controllers/user-db.controller.js'
 import { config } from 'dotenv'
+import { invalidPassword, userNotFound } from '../helpers/exceptions.js'
+import { errorHandler } from '../middlewares/login-md.js'
 config()
 
-const userSignIn = async info => {
-    const user = await getUserByUsername(info.username)
-    if(!user) return undefined
-    const match = await bcrypt.compareSync(info.password, user.password)
-    return match ? jwt.sign(user, process.env.USER_SECRET, { expiresIn: '48h' }) : undefined
-}
+const loginUser = async (req, res, getUser) => {
+    try {
+        const { username, password } = req.body;
+        const info = { username, password }
+        const user = await getUser(info.username)
+    
+        if(!user) userNotFound(info.username)
+        const match = await bcrypt.compareSync(info.password, user.password)
 
-const adminSignIn = async info => {
-    const user = await getAdminByUsername(info.username)
-    if(!user) return undefined
-    const match = await bcrypt.compareSync(info.password, user.password)
-    return match ? jwt.sign(user, process.env.USER_SECRET, { expiresIn: '48h' }) : undefined
-}
+        if(!match) invalidPassword(info.username)
+        const token = jwt.sign(user.toObject(), process.env.USER_SECRET, { expiresIn: '48h' })
+        
+        req.headers.token = token;
+        res.json({
+            message: `Welcome ${username}`,
+            token: token
+        });
+    } catch (err) {
+        errorHandler(res, err);
+    }
+};
 
-const clientSignIn = async info => {
-    const user = await getClientByUsername(info.username)
-    if(!user) return undefined
-    const match = await bcrypt.compareSync(info.password, user.password)
-    return match ? jwt.sign(user, process.env.USER_SECRET, { expiresIn: '48h' }) : undefined
-}
 
 export {
-    userSignIn,
-    adminSignIn,
-    clientSignIn
+    loginUser
 }

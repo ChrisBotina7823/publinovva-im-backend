@@ -17,6 +17,11 @@ import clientsRouter from './routes/clients.routes.js'
 import adminsRouter from './routes/admins.routes.js'
 app.use(indexRouter)
 app.use('/auth/', authRouter)
+
+// the following routes requires the user to be authenticated
+import { isUserLogged } from "./middlewares/login-md.js"
+app.use(isUserLogged)
+
 app.use('/users/', usersRouter)
 app.use('/clients/', clientsRouter)
 app.use('/admins/', adminsRouter)
@@ -25,14 +30,3 @@ app.use('/admins/', adminsRouter)
 app.listen(PORT, () => {
     console.log(`Running on port ${PORT}`)
 })
-// Check database connection
-import db from "./db/db-connection.js"
-db.getConnection( (err, connection) => {
-    if(err) {
-        console.error(err)
-        return
-    } else {
-        console.log(`Database ${process.env.DB_NAME} connected on ${process.env.DB_HOST}:${process.env.DB_PORT}`)
-    }
-    connection.release()
-} )

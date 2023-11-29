@@ -1,25 +1,75 @@
 import express from 'express'
-import { objectDepuration, encryptPassword } from '../helpers/helpers.js'
-import { deleteUser, registerClient, registerUser } from '../controllers/user-db.controller.js'
-import Client from '../model/Client.js'
-import User from '../model/User.js'
+import { encryptPassword } from '../helpers/encryption.js'
+import { deleteClient, insertClient, updateClient, getAllClients } from '../controller/client-controller.js'
+import { errorHandler, isAdminLogged, isUserLogged } from '../middlewares/login-md.js'
 
 const router = express.Router()
 
-router.post('/', async (req, res) => {
-    try {
-        const { username, password, email, profile_picture = undefined, fullname, country, phone, admin_username } = req.body
-        let newUser = new User(username, await encryptPassword(password), email, profile_picture)
-        let newClient = new Client(username, fullname, country, phone, admin_username)
-        objectDepuration(newUser)
-        objectDepuration(newClient)
-        await registerUser(newUser)
-        await registerClient(newClient)
-        res.status(200).json(`Client registered: ${username}`)
+router.get('/', async (req, res) => {
+    try { 
+        const clients = await getAllClients()
+        res.status(200).json(clients) 
     } catch(err) {
-        if(err.code != 'ER_DUP_ENTRY' ) deleteUser(req.body.username)
-        console.error(err)
-        res.status(400).json(`Error registering client: ${err.message}`)
+        errorHandler(res, err)
+    }
+})
+
+router.post('/', isAdminLogged, async (req, res) => {
+    try {
+        const { username, password, email, profile_picture = undefined, fullname, country, phone } = req.body
+        let newClient = {
+            username,
+            password: await encryptPassword(password),
+            email,
+            profile_picture,
+            fullname,
+            country,
+            phone
+        }
+        await insertClient(newClient)
+        res.status(200).json(`Customer added: ${username}`)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.get('/:username', async (req, res) => {
+    try {
+        const { username } = req.params
+        const customer = await getCustomerById(username)
+        res.status(200).json(customer)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.put('/:prevUsername', isAdminLogged, async (req, res) => {
+    try {
+        const { prevUsername } = req.params
+        const { username, password, email, profile_picture = undefined, fullname, country, phone } = req.body
+        let updatedClient = {
+            username,
+            password: await encryptPassword(password),
+            email,
+            profile_picture,
+            fullname,
+            country,
+            phone
+        }
+        await updateClient(prevUsername, updatedClient)
+        res.status(200).json(`Customer information updated: ${username}`)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.delete('/:username', isAdminLogged, async (req, res) => {
+    try {
+        const { username } = req.params
+        await deleteClient(username)
+        res.status(200).json(`Deleted user ${username}`)
+    } catch(err) {
+        errorHandler(res, err)
     }
 })
 

@@ -16,6 +16,30 @@ const isUserLogged = async (req, res, next) => {
     } 
 }
 
+const isAdminLogged = async (req, res, next) => {
+    if(req.user.__t != "Admin") {
+        res.status(401).json("You must have admin permissions to make this request")
+    } else {
+        next()
+    }
+}
+
+const isSuperUserLogged = async (req, res, next) => {
+    if(req.user.__t) {
+        res.status(401).json("You must have super user permissions to make this request")
+    } else {
+        next()
+    }
+}
+
+const errorHandler = (res, err) => {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+};
+
 export {
-    isUserLogged
+    isUserLogged,
+    isAdminLogged,
+    isSuperUserLogged,
+    errorHandler   
 }

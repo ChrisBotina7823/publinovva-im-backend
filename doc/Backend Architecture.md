@@ -15,21 +15,26 @@
 | --------------- | ------- | ------------------------------------------------ |
 | entity_name     | String  | NN                                               |
 | deposit_address | String  | NN                                               |
-| deposit_qr      | String  | DF=""                                                 | 
-| available_days  | Integer | NN, DF=0, AUTO SCH                               |
+| deposit_qr      | String  | DF=""                                            |
+| available_days  | Integer | NN, DF=0, EVENT=updateAdminMemberships           | 
 | account_state   | String  | NN, DF="activo", values:{"activo", "suspendido"} |
 
 #### User <- Client
 
-| attribute     | type    | extra                                                                |     |
-| ------------- | ------- | -------------------------------------------------------------------- | --- |
-| fullname      | String  | NN                                                                   |     |
-| country       | String  | NN                                                                   |     |
-| phone         | String  | NN                                                                   |     |
-| account_state | String  | NN, DF:"en revision", values:{"en revisión", "activo", "suspendido"} |     |
-| admin_id      | Integer | FK                                                                   |     | 
+A admin has many associated clients.
+
+| attribute     | type             | extra                                                                |     |
+| ------------- | ---------------- | -------------------------------------------------------------------- | --- |
+| fullname      | String           | NN                                                                   |     |
+| country       | String           | NN                                                                   |     |
+| phone         | String           | NN                                                                   |     |
+| account_state | String           | NN, DF:"en revision", values:{"en revisión", "activo", "suspendido"} |     |
+| iwallet       | InvestmentWallet | NN                                                                   |     |
+| usdWallet     | Wallet           | NN                                                                   |     |
 
 ### Package
+
+An admin has many packages.
 
 | attribute          | type    | extra        |
 | ------------------ | ------- | ------------ |
@@ -38,64 +43,71 @@
 | min_opening_amount | Decimal | NN           |
 | global_amount      | Decimal | NN           |
 | revenue_freq       | Decimal | NN           |
-| revenue_percentage | Decimal | NN           |
-| admin_id           | String  | NN, FK       |
+| revenue_percentage | Integer | NN           |
 
 ### Wallet
 
-| attribute        | type    | extra                              |
-| ---------------- | ------- | ---------------------------------- |
-| id               | Integer | NN, PK, AUTO                       |
-| type             | String  | NN, values: {"USD", "Inversiones"} |
-| address          | String  | NN                                 |
-| password         | String  | NN                                 |
-| available_amount | Decimal | NN                                 | 
-
-#### Wallet <- Investment Wallet
-
-| attribute         | type    | extra    |
-| ----------------- | ------- | -------- |
-| investment_amount | Decimal | NN, DF=0 | 
+| attribute         | type    | extra                              |
+| ----------------- | ------- | ---------------------------------- |
+| id                | Integer | NN, PK, AUTO                       |
+| type              | String  | NN, values: {"USD", "Inversiones"} |
+| address           | String  | NN                                 |
+| password          | String  | NN                                 |
+| available_amount  | Decimal | NN, DF=0                           |
+| investment_amount | Decimal | NN, DF=0                           | 
 
 ### Movement
 
-| attribute      | type    | extra                                                                                                  |
-| -------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| id             | Integer | NN, PK, AUTO                                                                                           |
-| date           | Date    | NN, DF=curr_date                                                                                       |
-| client_id      | String  | NN, FK                                                                                                 |
-| movement_state | String  | NN, DF="Pendiente", values:{"pendiente", "aprobado", "rechazado", "remitido", "cancelado", "resuelto"} | 
-| description    | String  |                                                                                                        |
+A client has many movements asociated.
+
+| attribute       | type    | extra                                                                                                  |
+| --------------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| id              | Integer | NN, PK, AUTO                                                                                           |
+| date            | Date    | NN, DF=curr_date                                                                                       |
+| movement_state  | String  | NN, DF="Pendiente", values:{"pendiente", "aprobado", "rechazado", "remitido", "cancelado", "resuelto"} |
+| description     | String  |                                                                                                        |
 
 #### Movement <- Wallet Transaction
 
-| attribute          | type    | extra    |
-| ------------------ | ------- | -------- |
-| transaction_amount | Decimal | NN       |
-| origin_wallet      | Integer | NN, FK   |
-| dest_wallet        | Integer | NN, FK   |
-| recieved_amount    | Decimal | NN, DF=0 | 
+| attribute          | type    | extra      |
+| ------------------ | ------- | ---------- |
+| transaction_amount | Decimal | NN         |
+| origin_wallet      | Integer | NN, FK     |
+| dest_wallet        | Integer | NN, FK     |
+| recieved_amount    | Decimal | NN, DF=0   |
 
+### Movement <- Support Ticket
+
+
+| attribute       | type    | extra      |
+| --------------- | ------- | ---------- |
+| category        | String  | NN         |
+| email_title     | String  | NN         |
+| description_msg | String  | NN         |
+	
 ### Investment
+
+A wallet has many asociated investments.
 
 | attribute  | type    | extra                                                           |
 | ---------- | ------- | --------------------------------------------------------------- |
 | id         | Integer | NN, PK, AUTO                                                    |
 | start_date | Date    | NN, DF=curr_date                                                |
-| wallet_id  | Integer | NN, FK                                                          |
-| package_id | Integer | NN, FK                                                          |
-| day_count  | Integer | NN, DF=0, AUTO SCH                                              |
-| revenue    | Integer | NN, DF=0, AUTO SCH                                              |
 | end_date   | Date    | NN                                                              |
-| state      | String  | NN, values:{"pendiente", "en curso", "rechazado", "finalizado"} | 
+| package_id | Integer | NN, FK                                                          |
+| day_count  | Integer | NN, DF=0, EVENT=updateInvestments                               | 
+| revenue    | Decimal | NN, DF=0, EVENT=updateInvestments                               |
+| state      | String  | NN, values:{"pendiente", "en curso", "rechazado", "finalizado"} |
 
-### Movement <- Support Ticket
 
-| attribute       | type   | extra |
-| --------------- | ------ | ----- |
-| category        | String | NN    |
-| email_title     | String | NN    |
-| description_msg | String | NN    |
+## Events
+
+UpdateInvestments: It will do this process every day at 00:00. For each row in the investements table the following:
+- Check if the investment state is equal to 'en curso'. Otherwise, it continue to the next investment
+- It check if the revenue_freq of the asociated package table is a multiple of the day_count field, if it is, it will recalculate the revenue as the product of the day_count * revenue_percentage * investment_amount
+- If the current date is greater or equal to the investment end_date, it will change the state to 'finalizado', and add the value of the revenue to the asociated investment wallet.
+
+UpdateAdminMemberships: Every day at 00:00 it will substract 1 to the available_days each 
 
 # Routes
 
@@ -109,22 +121,22 @@
 
 ### Users
 
-| route             | auth      | method | description                    |
-| ----------------- | --------- | ------ | ------------------------------ |
-| /users/:id        | depending | PUT    | edit user base profile     |
-| /users/           | superuser | POST   | add a new superuser            |
-| /profile          | depending | GET    | get user's profile information |
-| /profile/password | depending | PUT    | change user's password         |
-| /profile/photo    | depending | PUT    | change user's profile picture  |
+| route                       | auth      | method | description                    |
+| --------------------------- | --------- | ------ | ------------------------------ |
+| /users/:username            | depending | PUT    | edit user base profile         |
+| /users/                     | superuser | POST   | add a new superuser            |
+| /profile/                   | depending | GET    | get user's profile information |
+| /profile/password/:username | depending | PUT    | change user's password         |
+| /profile/photo/:username    | depending | PUT    | change user's profile picture  |
 
 ## Customers
 
 | route                  | auth     | method | description                                      |
 | ---------------------- | -------- | ------ | ------------------------------------------------ |
 | /customers/            | admin    | POST   | add a new customer                               |
-| /customers/:id         | customer | GET    | get a customer by id                             |
-| /customers/:id         | admin    | PUT    | edit customer information                        | 
-| /customers/profile/:id | customer | PUT    | edit customer profile (fullname, country, phone) |
+| /customers/:username         | customer | GET    | get a customer by id                             |
+| /customers/:username         | admin    | PUT    | edit customer information                        | 
+| /customers/profile/:username | customer | PUT    | edit customer profile (fullname, country, phone) |
 
 ## Admins
 
@@ -217,3 +229,7 @@
 - Is the revenue fixed or compound? the interest rate is applied to the initial amount or the current?
 - do the categories have fixed values?
 - In the end, the user can edit all the profile information, right?
+
+
+Pendientes:
+- contador de días de suscripción para el admin
