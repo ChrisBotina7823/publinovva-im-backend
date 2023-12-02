@@ -1,0 +1,9 @@
+- El login de los usuarios se hará con `username` para alinearse con la autenticación de Admin y Super usuario. 
+- El nombre de la billetera al hacer un deposito, retiro o transferencia es innecesario, ya que el cliente solo tiene una de cada una.
+- El código QR de un admin es el mismo para todos sus clientes, por lo que es más conveniente mostrarlo solo una vez en una sección de la pantalla
+- Con la implementación actual, la validación de días mínimos requeridos para un paquete de inversiones se calculan con base en el día de la solicitud (si se hace una solicitud con el mínimo de días requeridos, pero el admin lo aprueba pasados varios días ya no se cumpliría el requisito de días)
+- El cálculo de las ganancias se hacen con un porcentaje fijo calculado siempre con el `investment_amount`, no es interés compuesto.
+- Las categorías de ticket de soporte pueden tener cualquier valor
+- Al final el usuario podrá editar toda su información del perfil, es decir, nombre de usuario, email, contraseña y foto de perfil
+- La dirección de la billetera es directamente su ID.
+- Los IDs autogenerados para todas las entidades son cadenas de texto como esta: `656a8b41ad5193c52a6b0954`.
