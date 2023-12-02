@@ -50,11 +50,7 @@ const uploadMultipleFiles = async (files, folderId) => {
 };
 
 const deleteFile = async (fileId) => {
-    try {
-        await drive.files.delete({ fileId });
-    } catch (err) {
-        console.error(err);
-    }
+    await drive.files.delete({ fileId });
 };
 
 const createFolder = async (name, parentFolderId) => {

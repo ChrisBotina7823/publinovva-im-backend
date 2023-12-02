@@ -1,6 +1,6 @@
 import express from 'express';
 import { encryptPassword } from '../helpers/encryption.js';
-import { deleteAdmin, insertAdmin, updateAdmin, getAdminByUsername, getAllAdmins } from '../controller/admin-controller.js';
+import { deleteAdmin, insertAdmin, updateAdmin, getAdminByUsername, getAllAdmins, getAdminClients } from '../controller/admin-controller.js';
 import { errorHandler, isAdminLogged, isSuperUserLogged } from '../middlewares/login-md.js';
 import upload from '../helpers/multer-config.js';
 import { updateFileAttribute } from '../controller/user-controller.js';
@@ -18,6 +18,16 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/clients/:username', isAdminLogged, async (req, res) => {
+    try {
+        const { username } = req.params
+        const clients = await getAdminClients(username)
+        res.status(200).json(clients)
+    } catch( err ) {
+        errorHandler(res, err)
+    }
+})
+
 router.get('/:username', async (req, res, next) => {
     try {
         const { username } = req.params;
@@ -28,20 +38,13 @@ router.get('/:username', async (req, res, next) => {
     }
 });
 
+// Crear un nuevo administrador
 router.post('/', isSuperUserLogged, async (req, res, next) => {
     try {
-        const { username, password, email, profile_picture = undefined, entity_name, deposit_address, deposit_qr } = req.body;
-        let newAdmin = {
-            username,
-            password: await encryptPassword(password),
-            email,
-            profile_picture,
-            entity_name,
-            deposit_address,
-            deposit_qr
-        };
+        let newAdmin = req.body
+        newAdmin.password = await encryptPassword(req.body.password)
         await insertAdmin(newAdmin);
-        res.status(200).json({ message: `Admin added: ${username}` });
+        res.status(200).json(newAdmin);
     } catch (err) {
         errorHandler(res, err)
     }
@@ -51,28 +54,19 @@ router.post('/deposit-qr/:username', upload.single('deposit_qr'), async (req, re
     try {
         const { username } = req.params;
         const deposit_qr = await updateFileAttribute(username, process.env.DRIVE_DEPOSIT_QR_FOLDER, req.file, 'deposit_qr');
-        await updateAdmin(username, {deposit_qr})
-        res.status(200).json({ message: `${username} deposit qr updated successfully` });
+        const updatedAdmin = await updateAdmin(username, {deposit_qr})
+        res.status(200).json(updatedAdmin);
     } catch (err) {
         errorHandler(res, err);
     }    
 })
 
-router.put('/:prevUsername', isAdminLogged, async (req, res, next) => {
+router.put('/:username', isAdminLogged, async (req, res, next) => {
     try {
-        const { prevUsername } = req.params;
-        const { username, password, email, entity_name, deposit_address, deposit_qr = undefined } = req.body;
-        let updatedAdmin = {
-            username,
-            password: await encryptPassword(password),
-            email,
-            profile_picture,
-            entity_name,
-            deposit_address,
-            deposit_qr
-        };
-        await updateAdmin(prevUsername, updatedAdmin);
-        res.status(200).json({ message: `Admin information updated: ${username}` });
+        const { username } = req.params
+        let adminInfo = req.body
+        const updatedAdmin = await updateAdmin(username, adminInfo);
+        res.status(200).json(updatedAdmin);
     } catch (err) {
         errorHandler(res, err)
     }
@@ -89,6 +83,7 @@ router.put('/account-state/:username', async (req, res) => {
     }
 })
 
+// Eliminar un administrador
 router.delete('/:username', isAdminLogged, async (req, res, next) => {
     try {
         const { username } = req.params;
@@ -98,6 +93,4 @@ router.delete('/:username', isAdminLogged, async (req, res, next) => {
         errorHandler(res, err)
     }
 });
-
-
 export default router;

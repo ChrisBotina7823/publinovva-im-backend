@@ -17,7 +17,7 @@ const isUserLogged = async (req, res, next) => {
 }
 
 const isAdminLogged = async (req, res, next) => {
-    if(req.user.__t != "Admin") {
+    if(req.user.__t && req.user.__t != "Admin") {
         res.status(401).json("You must have admin permissions to make this request")
     } else {
         next()

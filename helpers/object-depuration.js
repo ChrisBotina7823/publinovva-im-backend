@@ -19,8 +19,20 @@ const getUrlFromId = (fileId) => {
   return `https://drive.google.com/uc?export=view&id=${fileId}`
 }
 
+const checkObj = (obj, prototype) => {
+  if(!obj) throw new Error(`${prototype} not found`)
+}
+
+const calculateDayDiff = (start_date, end_date) => {
+  const msDiff = end_date - start_date  
+  const dayDiff = Math.floor(msDiff / (1000 * 60 * 60 * 24));
+  return dayDiff
+}
+
 export {
     filterObject,
     getIdFromUrl,
-    getUrlFromId
+    getUrlFromId,
+    checkObj,
+    calculateDayDiff
 }

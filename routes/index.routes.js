@@ -7,9 +7,12 @@ import { sendEmail } from '../helpers/email-manager.js'
 import upload from '../helpers/multer-config.js'
 import { uploadFile } from '../helpers/drive-upload.js'
 import { config } from 'dotenv'
+import { Investment } from '../model/models.js'
 config()
 
 router.get('/', async (req, res) => {
+    const ans = await Investment.deleteMany({})
+    console.log(ans)
     const info = await getAllUsers()
     res.status(200).json({message: info})
 })

@@ -11,7 +11,12 @@ const generateToken = () => {
     return crypto.randomBytes(20).toString('hex')
 }
 
+const checkPassword = async (password, original) => {
+    return await bcrypt.compareSync(password, original)
+}
+
 export {
     encryptPassword,
-    generateToken
+    generateToken,
+    checkPassword
 }

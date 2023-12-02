@@ -21,9 +21,14 @@ const getPackageById = async (packageId) => {
     return await Package.findById(packageId);
 }
 
+const getAllPackages = async () => {
+    return await Package.find({})
+}
+
 export {
     insertPackage,
     updatePackage,
     deletePackage,
-    getPackageById
+    getPackageById,
+    getAllPackages
 }

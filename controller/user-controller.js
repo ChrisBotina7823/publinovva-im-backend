@@ -29,6 +29,10 @@ const getSuperUserByUsername = async (username) => {
     return await User.findOne({username, __t: undefined})
 }
 
+const getUserById = async (id) => {
+    return await User.findById(id)
+}
+
 const getUserByRecoveryToken = async (recovery_token) => {
     return await User.findOne({recovery_token}) 
 }
@@ -43,7 +47,11 @@ const updateFileAttribute = async (username, folderId, file, attribute) => {
     upload.deleteFile(file.path)
         .then(
             async () => {
-                await deleteFile(getIdFromUrl(previousImg));
+                try {
+                    await deleteFile(getIdFromUrl(previousImg));
+                } catch(err) {
+                    console.log(`User does not have file ${previousImg}`)
+                }
                 console.log(`File deleted from drive for ${attribute}`);
             }
         )
@@ -59,5 +67,6 @@ export {
     getAllUsers,
     getSuperUserByUsername,
     getUserByRecoveryToken,
-    updateFileAttribute
+    updateFileAttribute,
+    getUserById
 }
