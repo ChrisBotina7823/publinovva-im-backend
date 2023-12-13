@@ -22,7 +22,15 @@ const getAdminByUsername = async (username) => {
 }
 
 const getAdminClients = async (username) => {
-    return await Client.find({admin: await getAdminByUsername(username)})
+    const clients = await Client.find({ admin: await getAdminByUsername(username) })
+      .populate([
+          { path: "admin", select: "username deposit_address deposit_qr" },
+          { path: "usd_wallet", select: "available_amount" },
+          { path: "i_wallet", select: "investment_amount available_amount" }
+      ])
+      .exec();
+
+    return clients;
 }
 
 const getAdminPackages = async (username) => {

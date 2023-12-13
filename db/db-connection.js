@@ -1,20 +1,13 @@
 import { config } from 'dotenv'
 config()
 
-// import mysql2 from 'mysql2'
-
-// let db = mysql2.createPool({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASSWORD,
-//     database: process.env.DB_NAME
-// })
-
-//export default db
 
 import mongoose from 'mongoose'
 
-const uri = `mongodb+srv://publinovva:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_USER}.nbzocvm.mongodb.net/?retryWrites=true&w=majority`
+
+const uri = `mongodb+srv://publinovva:${process.env.MONGODB_PASSWORD}@publinovva.nbzocvm.mongodb.net/?retryWrites=true&w=majority`
+
+console.log(uri)
 
 mongoose.connect(uri)
 

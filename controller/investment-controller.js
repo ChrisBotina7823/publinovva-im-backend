@@ -41,6 +41,7 @@ const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
     let investmentInfo = {}
 
     const client = await getClientByUsername(username)
+    investmentInfo.client = client
     checkObj(client, "client")
     const wallet = await getWalletById(client.i_wallet)
     investmentInfo.wallet = client.i_wallet
@@ -101,6 +102,12 @@ const calculateRevenue = async (investment) => {
     return day_cnt*inv_package.revenue_percentage*investment.inv_amount
 }
 
+const getClientRevenueTable = async (id) => {
+    const investments = await Investment.find({client:id})
+    console.log(investments)
+    return investments
+} 
+
 export {
     insertInvestment,
     updateInvestment,
@@ -108,5 +115,6 @@ export {
     getInvestmentById,
     getAllInvestments,
     beginInvestment,
-    updateInvestmentState
+    updateInvestmentState,
+    getClientRevenueTable
 }

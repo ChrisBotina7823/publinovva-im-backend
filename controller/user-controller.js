@@ -18,7 +18,12 @@ const deleteUser = async (username) => {
 }
 
 const getUserByUsername = async (username) => {
-    return await User.findOne({ username });
+    const user = await User.findOne({ username })
+    if(user.__t && user.__t == "Client") {
+        const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
+        await User.populate(user, populateFields);
+    }   
+    return user;
 }
 
 const getAllUsers = async () => {

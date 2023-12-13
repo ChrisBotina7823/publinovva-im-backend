@@ -18,7 +18,14 @@ const deleteClient = async (username) => {
 
 // Get client by username
 const getClientByUsername = async (username) => {
-    return await Client.findOne({ username });
+    const user = await Client.findOne({ username })
+        .populate([
+            { path: "admin", select: "username deposit_address deposit_qr" },
+            { path: "usd_wallet", select: "available_amount" },
+            { path: "i_wallet", select: "investment_amount available_amount" }
+        ])
+        .exec();
+    return user
 }
 
 const getClientMovements = async (username) => {
@@ -26,7 +33,15 @@ const getClientMovements = async (username) => {
 }
 
 const getAllClients = async () => {
-    return await Client.find({})
+    const clients = await Client.find({})
+      .populate([
+          { path: "admin", select: "username deposit_address deposit_qr" },
+          { path: "usd_wallet", select: "available_amount" },
+          { path: "i_wallet", select: "investment_amount available_amount" }
+      ])
+      .exec();
+
+    return clients;
 }
 
 export {

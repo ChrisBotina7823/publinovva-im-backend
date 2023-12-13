@@ -1,7 +1,7 @@
 import { errorHandler } from "../middlewares/login-md.js";
 import { WalletTransaction } from "../model/models.js";
 import { getClientByUsername } from "./client-controller.js";
-import { getWalletById } from "./wallet-controller.js";
+import { getWalletById, updateWalletById } from "./wallet-controller.js";
 import { checkPassword } from "../helpers/encryption.js"
 import { sendEmail } from "../helpers/email-manager.js";
 import { getAdminByUsername } from "./admin-controller.js";
@@ -28,6 +28,16 @@ const getWalletTransactionById = async (walletTransactionId) => {
     return await WalletTransaction.findById(walletTransactionId);
 }
 
+const getUserTransactions = async (user) => {
+    return (
+        user.__t == "Admin" ?
+        await WalletTransaction.find({admin:user._id})
+        : user.__t == "Client" ?
+        await WalletTransaction.find({client:user._id})
+        : await WalletTransaction.find({}) 
+    )
+}
+
 const performTransaction = async (username, type, transaction_amount, wallet_password) => {
     let transactionInfo = {}
 
@@ -44,11 +54,13 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
         case 'usd-transfer':
             transactionInfo.dest_wallet = await getWalletById(client.usd_wallet)
             transactionInfo.origin_wallet = await getWalletById(client.i_wallet)
+            transactionInfo.movement_state = "aprobado"
             transactionType = 'transferencia a billetera USD'
             break
         case 'inv-transfer':
             transactionInfo.dest_wallet = await getWalletById(client.i_wallet)
             transactionInfo.origin_wallet = await getWalletById(client.usd_wallet)
+            transactionInfo.movement_state = "aprobado"
             transactionType = 'transferencia a billetera de Inversiones'
             break
         case 'deposit':
@@ -62,6 +74,7 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
         default:
             throw new Error(`Enter a valid wallet transaction type`)
     }
+    transactionInfo.transaction_type = type
 
     // check credentials and balance
     const { origin_wallet, dest_wallet } = transactionInfo
@@ -71,6 +84,10 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
 
         const enoughBalance = origin_wallet.available_amount >= transaction_amount
         if(!enoughBalance) throw new Error(`Not enough balance in wallet ${origin_wallet._id}`)
+        if(type == 'usd-transfer' || type == 'inv-transfer') {
+            updateWalletById(origin_wallet._id, {available_amount: origin_wallet.available_amount - transaction_amount})
+            updateWalletById(dest_wallet._id, {available_amount: dest_wallet.available_amount + transaction_amount})
+        }
     }
 
     const originInfo = origin_wallet ? `\n - Billetera origen: ${origin_wallet._id} (${origin_wallet.type})` : ""
@@ -88,5 +105,6 @@ export {
     updateWalletTransaction,
     deleteWalletTransaction,
     getWalletTransactionById,
-    performTransaction
+    performTransaction,
+    getUserTransactions
 }

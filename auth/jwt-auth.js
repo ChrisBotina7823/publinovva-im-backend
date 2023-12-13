@@ -20,7 +20,8 @@ const loginUser = async (req, res, getUser) => {
         req.headers.token = token;
         res.json({
             message: `Welcome ${username}`,
-            token: token
+            token: token,
+            user: user
         });
     } catch (err) {
         errorHandler(res, err);

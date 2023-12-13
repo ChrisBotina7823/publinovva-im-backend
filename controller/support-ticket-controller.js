@@ -44,10 +44,21 @@ const makeSupportTicket = async (username, description, category) => {
     return ticket
 }
 
+const getUserTickets = async (user) => {
+    return (
+        user.__t == "Admin" ?
+        await SupportTicket.find({admin:user._id})
+        : user.__t == "Client" ?
+        await SupportTicket.find({client:user._id})
+        : await SupportTicket.find({}) 
+    )
+}
+
 export {
     insertSupportTicket,
     updateSupportTicket,    
     deleteSupportTicket,
     getSupportTicketById,
-    makeSupportTicket
+    makeSupportTicket,
+    getUserTickets
 }
