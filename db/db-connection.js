@@ -7,8 +7,6 @@ import mongoose from 'mongoose'
 
 const uri = `mongodb+srv://publinovva:${process.env.MONGODB_PASSWORD}@publinovva.nbzocvm.mongodb.net/?retryWrites=true&w=majority`
 
-console.log(uri)
-
 mongoose.connect(uri)
 
 const db = mongoose.connection

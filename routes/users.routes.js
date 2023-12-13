@@ -51,10 +51,8 @@ router.post('/', async (req, res) => {
 router.put('/:prevUsername', async (req, res) => {
     try {
         const { prevUsername } = req.params;
-        console.log(req.user)
         // A user in general can only edit his profile.
         // A superuser can edit anyone's profile
-
         if(req.user.__t && req.user.username != prevUsername) throw new Error(`You do not have the permissions to edit this profile`)
         
         if(req.user.__t == 'Admin' && req.user.username != prevUsername) {

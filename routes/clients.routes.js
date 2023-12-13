@@ -1,8 +1,8 @@
 import express from 'express'
 import { encryptPassword } from '../helpers/encryption.js'
-import { deleteClient, insertClient, updateClient, getAllClients } from '../controller/client-controller.js'
+import { deleteClient, insertClient, updateClient, getAllClients, getClientByUsername } from '../controller/client-controller.js'
 import { errorHandler, isAdminLogged, isUserLogged } from '../middlewares/login-md.js'
-import { assignWalletToClient } from '../controller/wallet-controller.js'
+import { assignWalletToClient, updateWallet, updateWalletById } from '../controller/wallet-controller.js'
 import { getAdminByUsername } from '../controller/admin-controller.js'
 
 const router = express.Router()
@@ -27,8 +27,10 @@ router.post('/', isAdminLogged, async (req, res) => {
             profile_picture,
             fullname,
             country,
-            phone
+            phone,
         }
+
+        console.log(req.body)
 
         const admin = await getAdminByUsername(admin_username)
         if(!admin) throw new Error(`Client must be assigned to an admin`)
@@ -52,6 +54,7 @@ router.post('/', isAdminLogged, async (req, res) => {
                    console.log("Wallet assigned") 
                 }
             )
+        req.io.emit("clientsUpdate")
         res.status(200).json(client) 
     } catch(err) {
         errorHandler(res, err)
@@ -61,7 +64,7 @@ router.post('/', isAdminLogged, async (req, res) => {
 router.get('/:username', async (req, res) => {
     try {
         const { username } = req.params
-        const customer = await getCustomerById(username)
+        const customer = await getClientByUsername  (username)
         res.status(200).json(customer)
     } catch(err) {
         errorHandler(res, err)
@@ -73,6 +76,9 @@ router.put('/:username', isAdminLogged, async (req, res) => {
         const { username } = req.params
         const clientInfo = req.body
         const updatedClient = await updateClient(username, clientInfo)
+        const { usd_balance = undefined } = req.body
+        if(usd_balance) await updateWalletById(updatedClient.usd_wallet.toString(), {available_amount: usd_balance})
+        req.io.emit("clientsUpdate")
         res.status(200).json(updatedClient)
     } catch(err) {
         errorHandler(res, err)
@@ -83,6 +89,7 @@ router.delete('/:username', isAdminLogged, async (req, res) => {
     try {
         const { username } = req.params
         await deleteClient(username)
+        req.io.emit("clientsUpdate")
         res.status(200).json(`Deleted user ${username}`)
     } catch(err) {
         errorHandler(res, err)

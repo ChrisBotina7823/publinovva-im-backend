@@ -10,6 +10,10 @@ import { userNotFound } from '../helpers/exceptions.js';
 
 const router = express.Router();
 
+router.post('/', async (req, res) => {
+    await loginUser(req, res, getUserByUsername);
+})
+
 router.post('/superuser', async (req, res) => {
     await loginUser(req, res, getSuperUserByUsername);
 });

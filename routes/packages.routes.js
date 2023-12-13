@@ -25,7 +25,7 @@ router.post('/', isAdminLogged, async (req, res) => {
 });
 
 // Obtener todos los paquetes
-router.get('/', isAdminLogged, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const packages = await getAllPackages();
         res.status(200).json(packages);

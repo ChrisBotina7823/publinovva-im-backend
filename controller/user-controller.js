@@ -19,7 +19,7 @@ const deleteUser = async (username) => {
 
 const getUserByUsername = async (username) => {
     const user = await User.findOne({ username })
-    if(user.__t && user.__t == "Client") {
+    if(user?.__t && user.__t == "Client") {
         const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
         await User.populate(user, populateFields);
     }   
@@ -55,7 +55,7 @@ const updateFileAttribute = async (username, folderId, file, attribute) => {
                 try {
                     await deleteFile(getIdFromUrl(previousImg));
                 } catch(err) {
-                    console.log(`User does not have file ${previousImg}`)
+                    console.error(`User does not have file ${previousImg}`)
                 }
                 console.log(`File deleted from drive for ${attribute}`);
             }

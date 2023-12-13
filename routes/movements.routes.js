@@ -6,11 +6,12 @@ import { getWalletById, updateWallet } from "../controller/wallet-controller.js"
 import { getClientByUsername } from "../controller/client-controller.js"
 import { sendEmail } from "../helpers/email-manager.js"
 import { getAdminByUsername } from "../controller/admin-controller.js"
-import { insertWalletTransaction, performTransaction } from "../controller/wallet-transaction-controller.js"
+import { getUserTransactions, insertWalletTransaction, performTransaction } from "../controller/wallet-transaction-controller.js"
 import { Admin } from "../model/models.js"
 import { admin } from "googleapis/build/src/apis/admin/index.js"
 import { resourcesettings } from "googleapis/build/src/apis/resourcesettings/index.js"
-import { makeSupportTicket } from "../controller/support-ticket-controller.js"
+import { getUserTickets, makeSupportTicket } from "../controller/support-ticket-controller.js"
+import { getUserByUsername } from "../controller/user-controller.js"
 
 const router = express.Router()
 
@@ -23,16 +24,38 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/wallet-transactions/:username', async (req, res) => {
+    try {
+        const { username } = req.params
+        const user = await getUserByUsername(username)
+        const movements = await getUserTransactions(user)
+        return res.status(200).json(movements)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.get('/support-tickets/:username', async (req, res) => {
+    try {
+        const { username } = req.params
+        const user = await getUserByUsername(username)
+        const movements = await getUserTickets(user)
+        return res.status(200).json(movements)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
 router.post('/wallet-transactions/:username/:dest', async (req, res) => {
     try {
         const { username, dest } = req.params
         const { transaction_amount, wallet_password } = req.body
         const type = dest == 'usd' ? 'usd-transfer' : 'inv-transfer'
-        const movement = await performTransaction( username, type, transaction_amount, wallet_password, origin )
+        const movement = await performTransaction( username, type, transaction_amount, wallet_password )
         res.status(200).json(movement)
     } catch(err) {
         errorHandler(res, err)
-    }
+    }   
 });
 
 router.post('/make-deposit/:username', async (req, res) => {

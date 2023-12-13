@@ -1,6 +1,7 @@
 import express from "express";
-import { beginInvestment, getAllInvestments, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
+import { beginInvestment, getAllInvestments, getClientRevenueTable, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
 import { errorHandler } from "../middlewares/login-md.js";
+import { getClientByUsername } from "../controller/client-controller.js";
 
 const router = express.Router()
 
@@ -13,11 +14,23 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/revenues/:username', async (req, res) => {
+    try {
+        const { username } = req.params
+        const client = await getClientByUsername(username)
+        const revenues = await getClientRevenueTable(client._id)
+        res.status(200).json(revenues)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
 router.post('/:username', async (req, res) => {
     try{ 
         const { username } = req.params
         const { end_date, package_id, inv_amount } = req.body
         const investment = await beginInvestment(username, end_date, package_id, inv_amount)
+        req.io.emit("investmentsUpdate")
         res.status(200).json(investment)
     } catch(err) {
         errorHandler(res, err)
@@ -29,6 +42,7 @@ router.post('/change-state/:id', async (req, res) => {
         const { id } = req.params
         const { state } = req.body
         const updatedInvestment = await updateInvestmentState(id, state)
+        req.io.emit("investmentsUpdate")
         res.status(200).json(updatedInvestment)
     } catch(err) {
         errorHandler(res, err)
@@ -40,6 +54,7 @@ router.post('/update/:id', async (req, res) => {
         const { id } = req.params
         const updatedInfo = req.body
         const updatedInv = await updateInvestment(id, updatedInfo)
+        req.io.emit("investmentsUpdate")
         res.status(200).json(updatedInv)
     } catch(err) {
         errorHandler(res, err)

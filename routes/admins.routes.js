@@ -5,11 +5,12 @@ import { errorHandler, isAdminLogged, isSuperUserLogged } from '../middlewares/l
 import upload from '../helpers/multer-config.js';
 import { updateFileAttribute } from '../controller/user-controller.js';
 import { config } from 'dotenv';
+import { getAllClients } from '../controller/client-controller.js';
 config()
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', isSuperUserLogged, async (req, res) => {
     try {
         const admins = await getAllAdmins()
         res.status(200).json(admins)
@@ -18,15 +19,14 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/clients/:username', isAdminLogged, async (req, res) => {
+router.get('/clients', isAdminLogged, async (req, res) => {
     try {
-        const { username } = req.params
-        const clients = await getAdminClients(username)
-        res.status(200).json(clients)
+        const clients = req.user.__t ? (await getAdminClients(req.user.username)) : (await getAllClients())
+        res.status(200).json(clients)  
     } catch( err ) {
         errorHandler(res, err)
     }
-})
+})  
 
 router.get('/:username', async (req, res, next) => {
     try {

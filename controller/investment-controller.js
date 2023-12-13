@@ -96,9 +96,6 @@ const calculateRevenue = async (investment) => {
     const inv_package = await getPackageById(investment.package)
     if(!inv_package) return 0
     const day_cnt = Math.floor(dayDiff / inv_package.revenue_freq)
-    console.log(investment.inv_amount)
-    console.log(day_cnt)
-    console.log(inv_package.revenue_percentage)
     return day_cnt*inv_package.revenue_percentage*investment.inv_amount
 }
 

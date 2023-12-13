@@ -12,7 +12,6 @@ config()
 
 router.get('/', async (req, res) => {
     const ans = await Investment.deleteMany({})
-    console.log(ans)
     const info = await getAllUsers()
     res.status(200).json({message: info})
 })
