@@ -85,6 +85,8 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
         const enoughBalance = origin_wallet.available_amount >= transaction_amount
         if(!enoughBalance) throw new Error(`Not enough balance in wallet ${origin_wallet._id}`)
         if(type == 'usd-transfer' || type == 'inv-transfer') {
+            console.log(origin_wallet)
+            console.log(dest_wallet)
             updateWalletById(origin_wallet._id, {available_amount: origin_wallet.available_amount - transaction_amount})
             updateWalletById(dest_wallet._id, {available_amount: dest_wallet.available_amount + transaction_amount})
         }

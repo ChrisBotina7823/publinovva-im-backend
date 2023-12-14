@@ -75,9 +75,16 @@ router.put('/:username', isAdminLogged, async (req, res) => {
     try {
         const { username } = req.params
         const clientInfo = req.body
+        if(clientInfo.password) clientInfo.password = await encryptPassword(clientInfo.password) 
         const updatedClient = await updateClient(username, clientInfo)
+
+        // Wallet Information
         const { usd_balance = undefined } = req.body
+        const { i_password = undefined, usd_password = undefined } = req.body 
         if(usd_balance) await updateWalletById(updatedClient.usd_wallet.toString(), {available_amount: usd_balance})
+        if(i_password) await updateWalletById(updatedClient.i_wallet.toString(), {password: await encryptPassword(i_password)})
+        if(usd_password) await updateWalletById(updatedClient.usd_wallet.toString(), {password: await encryptPassword(usd_password)})
+        
         req.io.emit("clientsUpdate")
         res.status(200).json(updatedClient)
     } catch(err) {

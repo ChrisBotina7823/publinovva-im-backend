@@ -6,6 +6,13 @@ import { getPackageById } from "./package-controller.js";
 import { getUserById } from "./user-controller.js";
 import { getWalletById, updateWallet, updateWalletById } from "./wallet-controller.js";
 
+const statePhase = {
+    "pendiente": 0,
+    "en curso": 1,
+    "rechazado": 1,
+    "finalizado": 2,
+}
+
 // Insert a new investment
 const insertInvestment = async (investmentJson) => {
     const investment = new Investment(investmentJson);
@@ -51,12 +58,12 @@ const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
 
     if(inv_amount > wallet.available_amount) throw new Error(`Not enough balance in wallet ${wallet._id}`)
 
-    if(inv_amount < inv_package.min_opening_amount) throw new Error(`The package ${inv_package.name} requires ${inv_package.min_opening_amount} available balance in Investment Wallet`)
+    if(inv_amount < inv_package.min_opening_amount) throw new Error(`The package ${inv_package.name} requiere una inversión mínima de $${inv_package.min_opening_amount} `)
     investmentInfo.inv_amount = inv_amount
 
     investmentInfo.end_date = new Date(end_date)
     const dayDiff = calculateDayDiff( new Date(), investmentInfo.end_date )
-    if(dayDiff < inv_package.min_inv_days) throw new Error(`This package requires ${inv_package.min_inv_days} investment days minimum`)
+    if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package._id} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
 
     const investment = await insertInvestment(investmentInfo)
     sendEmail(client.email, "Solicitud de Inversión", "¡Hola! Tu solicitud de inversión se ha realizado correctamente. Se notificará al administrador para que responda a tu solicitud")
@@ -70,7 +77,8 @@ const updateInvestmentState = async (id, state) => {
     const investment = await getInvestmentById(id)
     checkObj(investment, "investment")
     const wallet = await getWalletById(investment.wallet)
-    if(investment.state == state) throw new Error(`Investment ${id} status is already set to ${state}`)
+    if(investment.state == state) throw new Error(`El estado ${id} ya está  ${state}`)
+    if( statePhase[investment.state] > statePhase[state] ) throw new Error(`No es posible cambiar el estado de "${investment.state}" a "${state}"`)
 
     switch(state) {
         case "en curso":
@@ -80,9 +88,12 @@ const updateInvestmentState = async (id, state) => {
         case "finalizado":
             updateWalletById(wallet._id, {available_amount: wallet.available_amount + investment.inv_amount + (await calculateRevenue(investment)) })
             break
+        case "rechazado":
+            break
         default:
             throw new Error(`Insert a valid state for investments`)
     }
+
     const updatedInv = await updateInvestment(id, invInfo)
     return updatedInv
 }
@@ -101,9 +112,43 @@ const calculateRevenue = async (investment) => {
 
 const getClientRevenueTable = async (id) => {
     const investments = await Investment.find({client:id})
-    console.log(investments)
-    return investments
-} 
+        .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"revenue_percentage revenue_freq"}])
+        .exec()
+    const revenueTables = await Promise.all(investments.map(calculateRevenueTable));
+    return revenueTables.flat();
+}
+
+const calculateRevenueTable = (investment) => {
+    if (!investment.actual_start_date || investment.state == 'pendiente' == investment.state == "rechazado") return [];
+
+    const revenueTable = [];
+    const { inv_amount, actual_start_date, end_date } = investment;
+    const { revenue_percentage, revenue_freq } = investment.package
+
+
+    const currentDate = new Date(actual_start_date);
+
+    const endDate = new Date(end_date)
+
+    const revenueAmount = inv_amount * revenue_percentage;
+
+    const todayDate = new Date()
+
+    while (currentDate <= endDate && currentDate <= todayDate) {
+        const daysDiff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
+        revenueTable.push({
+            date: currentDate.toISOString(),
+            daysDiff,
+            revenueAmount,
+            investment: investment._id
+        });
+
+        currentDate.setDate(currentDate.getDate() + revenue_freq);
+    }
+
+    return revenueTable;
+};
+
 
 export {
     insertInvestment,
