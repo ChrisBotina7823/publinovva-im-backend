@@ -1,11 +1,11 @@
 import express from "express";
 import { beginInvestment, getAllInvestments, getClientRevenueTable, getInvestmentById, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
-import { errorHandler } from "../middlewares/login-md.js";
+import { errorHandler, isAdminLogged } from "../middlewares/login-md.js";
 import { getClientByUsername } from "../controller/client-controller.js";
 
 const router = express.Router()
 
-router.get('/', async (req, res) => {
+router.get('/', isAdminLogged, async (req, res) => {
     try {
         const investments = await getAllInvestments()
         res.status(200).json(investments)
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params;
         const investment = await getInvestmentById(id);
@@ -35,7 +35,7 @@ router.get('/revenues/:username', async (req, res) => {
     }
 })
 
-router.post('/:username', async (req, res) => {
+router.post('/:username', isAdminLogged, async (req, res) => {
     try{ 
         const { username } = req.params
         const { end_date, package_id, inv_amount } = req.body
@@ -47,7 +47,7 @@ router.post('/:username', async (req, res) => {
     }
 })
 
-router.post('/change-state/:id', async (req, res) => {
+router.post('/change-state/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params
         const { state } = req.body
@@ -59,7 +59,7 @@ router.post('/change-state/:id', async (req, res) => {
     }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params
         const { actual_start_date, end_date, state = undefined } = req.body
@@ -77,7 +77,7 @@ router.put('/:id', async (req, res) => {
     }
 })
 
-router.post('/update/:id', async (req, res) => {
+router.post('/update/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params
         const updatedInfo = req.body

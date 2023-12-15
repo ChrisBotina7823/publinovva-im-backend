@@ -1,7 +1,7 @@
 import express from "express"
 import bcrypt from 'bcrypt'
 import { getAllMovements, insertMovement, updateMovement } from "../controller/movement-controller.js"
-import { errorHandler } from '../middlewares/login-md.js'
+import { errorHandler, isAdminLogged } from '../middlewares/login-md.js'
 import { getWalletById, updateWallet } from "../controller/wallet-controller.js"
 import { getClientByUsername } from "../controller/client-controller.js"
 import { sendEmail } from "../helpers/email-manager.js"
@@ -19,6 +19,20 @@ router.get('/', async (req, res) => {
     try {
         const movements = await getAllMovements()
         return res.status(200).json(movements)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.put('/change-state/:id', isAdminLogged, async (req, res) => {
+    try{ 
+        const { id } = req.params
+        const { movement_state } = req.body
+        const updatedMovement = await updateMovement(id, {movement_state})
+        console.log("actualizado")
+        console.log(updatedMovement)
+        req.io.emit("movementsUpdate")
+        res.status(200).json(updatedMovement)
     } catch(err) {
         errorHandler(res, err)
     }
@@ -88,11 +102,13 @@ router.post('/make-support-ticket/:username', async (req, res) => {
         const { username } = req.params
         const { description, category } = req.body
         const movement = await makeSupportTicket(username, description, category)
-        req.io.emit("ticketsUpdate")
+        req.io.emit("movementsUpdate")
         res.status(200).json(movement)        
     } catch(err) {
         errorHandler(res, err)
     }
 })
+
+
 
 export default router

@@ -11,9 +11,8 @@ import { Investment } from '../model/models.js'
 config()
 
 router.get('/', async (req, res) => {
-    const ans = await Investment.deleteMany({})
-    const info = await getAllUsers()
-    res.status(200).json({message: info})
+    req.io.emit("supportTicketsUpdate")
+    res.status(200).json({message: "hello"})
 })
 
 

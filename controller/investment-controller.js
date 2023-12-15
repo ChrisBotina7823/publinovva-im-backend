@@ -93,7 +93,7 @@ const updateInvestmentState = async (id, state) => {
         default:
             throw new Error(`Insert a valid state for investments`)
     }
-
+    
     const updatedInv = await updateInvestment(id, invInfo)
     return updatedInv
 }
