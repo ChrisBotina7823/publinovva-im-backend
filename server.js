@@ -58,6 +58,11 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 });
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
 // Set server to port
 server.listen(PORT, () => {
     console.log(`Running on port ${PORT}`);
