@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 
 const app = express();
 config();
-const PORT = process.env.SERVER_PORT;
+const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 const corsOptions = {
