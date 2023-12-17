@@ -29,8 +29,6 @@ router.put('/change-state/:id', isAdminLogged, async (req, res) => {
         const { id } = req.params
         const { movement_state } = req.body
         const updatedMovement = await updateMovement(id, {movement_state})
-        console.log("actualizado")
-        console.log(updatedMovement)
         req.io.emit("movementsUpdate")
         res.status(200).json(updatedMovement)
     } catch(err) {

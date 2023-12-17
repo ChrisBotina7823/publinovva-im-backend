@@ -11,6 +11,7 @@ import { Investment } from '../model/models.js'
 config()
 
 router.get('/', async (req, res) => {
+    console.log("a")
     req.io.emit("supportTicketsUpdate")
     res.status(200).json({message: "hello"})
 })
