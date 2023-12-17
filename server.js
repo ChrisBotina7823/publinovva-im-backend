@@ -38,7 +38,8 @@ import movementsRouter from './routes/movements.routes.js';
 import walletsRouter from './routes/wallets.routes.js';
 import investmentsRouter from './routes/investments.routes.js';
 
-app.use(indexRouter);
+
+// app.use(indexRouter);
 app.use('/auth/', authRouter);
 
 // the following routes require the user to be authenticated
@@ -58,7 +59,9 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 });
 
-// Set server to port
 server.listen(PORT, () => {
-    console.log(`Running on port ${PORT}`);
+  const address = server.address();
+  const protocol = server instanceof http.Server ? 'http' : 'https';
+  const serverAddress = `${protocol}://localhost:${address.port}`;
+  console.log(`Server is listening on ${serverAddress}`);
 });
