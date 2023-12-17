@@ -17,6 +17,8 @@ const loginUser = async (req, res, getUser) => {
         if(!match) invalidPassword(info.username)
         const token = jwt.sign(user.toObject(), process.env.USER_SECRET, { expiresIn: '100y' })
         
+        if(user.account_state && user.account_state == "suspendido") throw new Error(`La cuenta ${username} se encuentra suspendida, contáctate con el administrador.`)
+
         req.headers.token = token;
         res.json({
             message: `Welcome ${username}`,

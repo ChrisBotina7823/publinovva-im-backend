@@ -39,12 +39,14 @@ router.get('/:username', async (req, res, next) => {
 });
 
 // Crear un nuevo administrador
-router.post('/', isSuperUserLogged, async (req, res, next) => {
+router.post('/', isSuperUserLogged, async (req, res) => {
     try {
         let newAdmin = req.body
         newAdmin.password = await encryptPassword(req.body.password)
-        await insertAdmin(newAdmin);
-        res.status(200).json(newAdmin);
+        const updatedAdmin = await insertAdmin(newAdmin);
+        req.io.emit("adminsUpdate")
+        req.io.emit("usersUpdate")
+        res.status(200).json(updatedAdmin);
     } catch (err) {
         errorHandler(res, err)
     }
@@ -53,8 +55,9 @@ router.post('/', isSuperUserLogged, async (req, res, next) => {
 router.post('/deposit-qr/:username', upload.single('deposit_qr'), async (req, res) => {
     try {
         const { username } = req.params;
-        const deposit_qr = await updateFileAttribute(username, process.env.DRIVE_DEPOSIT_QR_FOLDER, req.file, 'deposit_qr');
-        const updatedAdmin = await updateAdmin(username, {deposit_qr})
+        const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_DEPOSIT_QR_FOLDER, req.file, 'deposit_qr');
+        req.io.emit("adminsUpdate")
+        req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
     } catch (err) {
         errorHandler(res, err);
@@ -65,7 +68,10 @@ router.put('/:username', isAdminLogged, async (req, res, next) => {
     try {
         const { username } = req.params
         let adminInfo = req.body
+        if(adminInfo.password) adminInfo.password = await encryptPassword(adminInfo.password) 
         const updatedAdmin = await updateAdmin(username, adminInfo);
+        req.io.emit("adminsUpdate")
+        req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
     } catch (err) {
         errorHandler(res, err)
@@ -77,6 +83,7 @@ router.put('/account-state/:username', async (req, res) => {
         const { account_state } = req.body
         const { username } = req.params
         updateAdmin(username, {account_state})
+        req.io.emit("adminsUpdate")
         res.status(200).json({message: `${username} Admin status changed to ${account_state}`})
     } catch(err) {
         errorHandler(res, err)
@@ -88,6 +95,7 @@ router.delete('/:username', isAdminLogged, async (req, res, next) => {
     try {
         const { username } = req.params;
         await deleteAdmin(username);
+        req.io.emit("adminsUpdate")
         res.status(200).json({ message: `Deleted user ${username}` });
     } catch (err) {
         errorHandler(res, err)

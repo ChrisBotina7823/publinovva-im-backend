@@ -18,6 +18,7 @@ router.post('/', isAdminLogged, async (req, res) => {
         packageData.admin = await getAdminByUsername(req.body.admin_username)
         if(!packageData.admin) throw new Error(`Admin not found, cannot assign package`)
         const newPackage = await insertPackage(packageData);
+        req.io.emit("packagesUpdate")
         res.status(201).json(newPackage);
     } catch (err) {
         errorHandler(res, err);
@@ -56,6 +57,7 @@ router.put('/:id', isAdminLogged, async (req, res) => {
         }
         const updatedPackage = await updatePackage(id, updatedData);
         if(!updatedPackage) throw new Error(`Package ${id} not found`)
+        req.io.emit("packagesUpdate")
         res.status(200).json(updatedPackage);
     } catch (err) {
         errorHandler(res, err);
@@ -67,6 +69,7 @@ router.delete('/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params;
         await deletePackage(id);
+        req.io.emit("packagesUpdate")
         res.status(200).json({message:`Package ${id} deleted successfully`});
     } catch (err) {
         errorHandler(res, err);

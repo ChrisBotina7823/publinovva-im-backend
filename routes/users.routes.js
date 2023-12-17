@@ -3,7 +3,7 @@ import upload from '../helpers/multer-config.js';
 const router = express.Router();
 config()
 import { config } from 'dotenv';
-import { insertUser, deleteUser, updateUser, getUserByUsername, updateFileAttribute, getAllUsers } from '../controller/user-controller.js';
+import { insertUser, deleteUser, updateUser, getUserByUsername, updateFileAttribute, getAllUsers, getUserById } from '../controller/user-controller.js';
 import { encryptPassword } from '../helpers/encryption.js';
 import { errorHandler } from '../middlewares/login-md.js';
 import { getAdminClients } from '../controller/admin-controller.js';
@@ -27,6 +27,16 @@ router.get('/:username', async (req, res) => {
     try {
         const {username} = req.params
         const user = await getUserByUsername(username)
+        res.status(200).json(user)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.get('/id/:id', async (req, res) => {
+    try {
+        const {id} = req.params
+        const user = await getUserById(id)
         res.status(200).json(user)
     } catch(err) {
         errorHandler(res, err)
@@ -106,6 +116,9 @@ router.post('/profile-picture/:username', upload.single('profile_picture'), asyn
         picture.originalname = Buffer.from(picture.originalname, 'ascii').toString('utf8')
 
         const updatedUser = await updateFileAttribute(username, process.env.DRIVE_PROFILE_PICTURE_FOLDER, picture, 'profile_picture');
+        req.io.emit("usersUpdate")
+        req.io.emit("adminsUpdate")
+        req.io.emit("clientsUpdate")
         res.status(200).json(updatedUser);
     } catch (err) {
         errorHandler(res, err);

@@ -46,9 +46,9 @@ const makeSupportTicket = async (username, description, category) => {
 
 const getUserTickets = async (user) => {
     return (
-        user.__t == "Admin" ?
+        user?.__t == "Admin" ?
         await SupportTicket.find({admin:user._id})
-        : user.__t == "Client" ?
+        : user?.__t == "Client" ?
         await SupportTicket.find({client:user._id})
         : await SupportTicket.find({}) 
     )

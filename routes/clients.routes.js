@@ -71,7 +71,7 @@ router.get('/:username', async (req, res) => {
     }
 })
 
-router.put('/:username', isAdminLogged, async (req, res) => {
+router.put('/:username', async (req, res) => {
     try {
         const { username } = req.params
         const clientInfo = req.body
@@ -86,6 +86,7 @@ router.put('/:username', isAdminLogged, async (req, res) => {
         if(usd_password) await updateWalletById(updatedClient.usd_wallet.toString(), {password: await encryptPassword(usd_password)})
         
         req.io.emit("clientsUpdate")
+        req.io.emit("usersUpdate")
         res.status(200).json(updatedClient)
     } catch(err) {
         errorHandler(res, err)

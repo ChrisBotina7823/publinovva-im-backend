@@ -3,15 +3,15 @@ import bcrypt from 'bcrypt'
 import { getAllMovements, insertMovement, updateMovement } from "../controller/movement-controller.js"
 import { errorHandler, isAdminLogged } from '../middlewares/login-md.js'
 import { getWalletById, updateWallet } from "../controller/wallet-controller.js"
-import { getClientByUsername } from "../controller/client-controller.js"
+import { getClientByUsername, updateClient } from "../controller/client-controller.js"
 import { sendEmail } from "../helpers/email-manager.js"
 import { getAdminByUsername } from "../controller/admin-controller.js"
-import { getUserTransactions, insertWalletTransaction, performTransaction } from "../controller/wallet-transaction-controller.js"
+import { approveTransaction, getUserTransactions, getWalletTransactionById, insertWalletTransaction, performTransaction, updateWalletTransaction } from "../controller/wallet-transaction-controller.js"
 import { Admin } from "../model/models.js"
 import { admin } from "googleapis/build/src/apis/admin/index.js"
 import { resourcesettings } from "googleapis/build/src/apis/resourcesettings/index.js"
 import { getUserTickets, makeSupportTicket } from "../controller/support-ticket-controller.js"
-import { getUserByUsername } from "../controller/user-controller.js"
+import { getUserById, getUserByUsername } from "../controller/user-controller.js"
 
 const router = express.Router()
 
@@ -109,6 +109,30 @@ router.post('/make-support-ticket/:username', async (req, res) => {
     }
 })
 
+router.post('/approve-transaction/:id', async (req, res) => {
+    try {
+        const { received_amount } = req.body
+        const { id } = req.params
+        const updatedTransaction = await approveTransaction(id, received_amount)
+        req.io.emit("clientsUpdate")
+        req.io.emit("usersUpdate")
+        req.io.emit("movementsUpdate") 
+        res.status(200).json(updatedTransaction)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
 
+router.post('/reject-transaction/:id', async (req, res) => {
+    try {
+        const {id} = req.params
+        await updateWalletTransaction(id, {movement_state: "rechazado"})
+        req.io.emit("clientsUpdate")
+        req.io.emit("usersUpdate")
+        req.io.emit("movementsUpdate") 
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
 
 export default router

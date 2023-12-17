@@ -1,5 +1,5 @@
 import { errorHandler } from "../middlewares/login-md.js";
-import { WalletTransaction } from "../model/models.js";
+import { Wallet, WalletTransaction } from "../model/models.js";
 import { getClientByUsername } from "./client-controller.js";
 import { getWalletById, updateWalletById } from "./wallet-controller.js";
 import { checkPassword } from "../helpers/encryption.js"
@@ -30,9 +30,9 @@ const getWalletTransactionById = async (walletTransactionId) => {
 
 const getUserTransactions = async (user) => {
     return (
-        user.__t == "Admin" ?
+        user?.__t == "Admin" ?
         await WalletTransaction.find({admin:user._id})
-        : user.__t == "Client" ?
+        : user?.__t == "Client" ?
         await WalletTransaction.find({client:user._id})
         : await WalletTransaction.find({}) 
     )
@@ -102,11 +102,32 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
     return await insertWalletTransaction(transactionInfo);
 };
 
+const approveTransaction = async (id, received_amount) => {
+    console.log(id)
+    const transaction = await WalletTransaction.findById(id)
+        .populate([{path:"origin_wallet dest_wallet", select:"available_amount"}])
+        .exec()
+    console.log(transaction)
+    if(transaction.transaction_type == "withdrawal") {
+        const { origin_wallet } = transaction
+        if(origin_wallet.available_amount < received_amount) {
+            throw new Error(`La billetera ${origin_wallet._id} no tiene los suficientes fondos para el retiro`)
+        }
+        await updateWalletById(origin_wallet, {available_amount: origin_wallet.available_amount - received_amount})
+    } else {
+        const { dest_wallet } = transaction
+        await updateWalletById(dest_wallet, {available_amount: dest_wallet.available_amount + received_amount})
+    }
+
+    return await WalletTransaction.findByIdAndUpdate(id, {movement_state:"resuelto", received_amount: received_amount})
+}
+
 export {
     insertWalletTransaction,
     updateWalletTransaction,
     deleteWalletTransaction,
     getWalletTransactionById,
     performTransaction,
-    getUserTransactions
+    getUserTransactions,
+    approveTransaction
 }

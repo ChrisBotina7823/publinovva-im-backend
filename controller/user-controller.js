@@ -2,6 +2,8 @@ import { deleteFile, uploadFile } from '../helpers/drive-upload.js';
 import upload from '../helpers/multer-config.js';
 import { getIdFromUrl, getUrlFromId } from '../helpers/object-depuration.js';
 import { User }  from '../model/models.js';
+import { updateAdmin } from './admin-controller.js';
+import { updateClient } from './client-controller.js';
 
 const insertUser = async (userJson) => {
     const user = new User(userJson);
@@ -35,7 +37,12 @@ const getSuperUserByUsername = async (username) => {
 }
 
 const getUserById = async (id) => {
-    return await User.findById(id)
+    const user = await User.findById(id)
+    if(user?.__t && user.__t == "Client") {
+        const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
+        await User.populate(user, populateFields);
+    }  
+    return user
 }
 
 const getUserByRecoveryToken = async (recovery_token) => {
@@ -60,8 +67,13 @@ const updateFileAttribute = async (username, folderId, file, attribute) => {
                 console.log(`File deleted from drive for ${attribute}`);
             }
         )
-    user[attribute] = previewLink
-    user.save()
+    if(user.__t == "Admin") {
+        return await updateAdmin(username, {[attribute]:previewLink})
+    } else if(user.__t == "Client") {
+        return await updateClient(username, {[attribute]:previewLink})
+    } else {
+        return await updateUser(username, {[attribute]:previewLink})
+    }
 }
 
 export {

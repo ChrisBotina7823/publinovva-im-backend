@@ -130,16 +130,16 @@ const calculateRevenueTable = (investment) => {
 
     const endDate = new Date(end_date)
 
-    const revenueAmount = inv_amount * revenue_percentage;
+    const revenue_amount = inv_amount * revenue_percentage;
 
     const todayDate = new Date()
 
     while (currentDate <= endDate && currentDate <= todayDate) {
-        const daysDiff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
+        const days_diff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
         revenueTable.push({
             date: currentDate.toISOString(),
-            daysDiff,
-            revenueAmount,
+            days_diff,
+            revenue_amount,
             investment: investment._id
         });
 
