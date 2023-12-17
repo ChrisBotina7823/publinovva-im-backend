@@ -10,7 +10,7 @@ const PORT = process.env.SERVER_PORT
 const server = http.createServer(app)
 
 const corsOptions = {
-    origin: 'http://localhost:3000', // Cambia esto a la URL correcta del cliente
+    origin: process.env.CORS_ORIGIN, // Cambia esto a la URL correcta del cliente
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   };
