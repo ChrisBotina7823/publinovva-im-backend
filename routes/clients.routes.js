@@ -29,9 +29,6 @@ router.post('/', isAdminLogged, async (req, res) => {
             country,
             phone,
         }
-
-        console.log(req.body)
-
         const admin = await getAdminByUsername(admin_username)
         if(!admin) throw new Error(`Client must be assigned to an admin`)
         newClient.admin = admin

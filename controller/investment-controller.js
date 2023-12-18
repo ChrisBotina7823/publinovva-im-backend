@@ -39,7 +39,7 @@ const getInvestmentById = async (investmentId) => {
 }
 
 const getAllInvestments = async () => {
-    const inv =  await Investment.find({})
+    const inv =  await Investment.find({}).populate([{path:"client", select:"fullname"}, {path:"package", select:"name"}]).exec()
     inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
     return inv
 }
@@ -56,20 +56,21 @@ const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
     checkObj(inv_package, "inv_package")
     investmentInfo.package = inv_package
 
-    if(inv_amount > wallet.available_amount) throw new Error(`Not enough balance in wallet ${wallet._id}`)
+    if(inv_amount > wallet.available_amount) throw new Error(`No hay suficiente dinero en la billetera ${wallet._id}`)
 
-    if(inv_amount < inv_package.min_opening_amount) throw new Error(`The package ${inv_package.name} requiere una inversión mínima de $${inv_package.min_opening_amount} `)
+    if(inv_amount < inv_package.min_opening_amount) throw new Error(`El monto es menor al requerido por el paquete ${inv_package.name}. Monto Mínimo: $${inv_package.min_opening_amount} `)
     investmentInfo.inv_amount = inv_amount
 
     investmentInfo.end_date = new Date(end_date)
     const dayDiff = calculateDayDiff( new Date(), investmentInfo.end_date )
-    if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package._id} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
+    if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package.name} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
 
     const investment = await insertInvestment(investmentInfo)
     sendEmail(client.email, "Solicitud de Inversión", "¡Hola! Tu solicitud de inversión se ha realizado correctamente. Se notificará al administrador para que responda a tu solicitud")
     sendEmail(client.email, "Solicitud de Inversión", `El cliente identificado con usuario ${client.username} ha realizado una solicitud de inversión. Revisa la plataforma para evaluar la solicitud`)
 
     return investment
+
 }
 
 const updateInvestmentState = async (id, state) => {

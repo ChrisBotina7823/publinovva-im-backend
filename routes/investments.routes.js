@@ -35,7 +35,7 @@ router.get('/revenues/:username', async (req, res) => {
     }
 })
 
-router.post('/:username', isAdminLogged, async (req, res) => {
+router.post('/:username', async (req, res) => {
     try{ 
         const { username } = req.params
         const { end_date, package_id, inv_amount } = req.body
@@ -67,7 +67,6 @@ router.put('/:id', isAdminLogged, async (req, res) => {
             actual_start_date,
             end_date
         }
-        console.log(state)
         if(state) await updateInvestmentState(id, state)
         const updatedInvestment = await updateInvestment(id, investmentInfo)
         req.io.emit("investmentsUpdate")

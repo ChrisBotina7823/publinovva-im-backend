@@ -31,10 +31,10 @@ const getWalletTransactionById = async (walletTransactionId) => {
 const getUserTransactions = async (user) => {
     return (
         user?.__t == "Admin" ?
-        await WalletTransaction.find({admin:user._id})
+        await WalletTransaction.find({admin:user._id}).populate([{path:"client", select:"fullname"}, {path:"admin", select:"entity_name"}]).exec()
         : user?.__t == "Client" ?
-        await WalletTransaction.find({client:user._id})
-        : await WalletTransaction.find({}) 
+        await WalletTransaction.find({client:user._id}).populate([{path:"client", select:"fullname"}, {path:"admin", select:"entity_name"}]).exec()
+        : await WalletTransaction.find({}).populate([{path:"client", select:"fullname"}, {path:"admin", select:"entity_name"}]).exec()
     )
 }
 
@@ -85,10 +85,8 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
         const enoughBalance = origin_wallet.available_amount >= transaction_amount
         if(!enoughBalance) throw new Error(`Not enough balance in wallet ${origin_wallet._id}`)
         if(type == 'usd-transfer' || type == 'inv-transfer') {
-            console.log(origin_wallet)
-            console.log(dest_wallet)
-            updateWalletById(origin_wallet._id, {available_amount: origin_wallet.available_amount - transaction_amount})
-            updateWalletById(dest_wallet._id, {available_amount: dest_wallet.available_amount + transaction_amount})
+            await updateWalletById(origin_wallet._id.toString(), {available_amount: origin_wallet.available_amount - transaction_amount})
+            await updateWalletById(dest_wallet._id.toString(), {available_amount: dest_wallet.available_amount + transaction_amount})
         }
     }
 
@@ -103,11 +101,9 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
 };
 
 const approveTransaction = async (id, received_amount) => {
-    console.log(id)
     const transaction = await WalletTransaction.findById(id)
         .populate([{path:"origin_wallet dest_wallet", select:"available_amount"}])
         .exec()
-    console.log(transaction)
     if(transaction.transaction_type == "withdrawal") {
         const { origin_wallet } = transaction
         if(origin_wallet.available_amount < received_amount) {

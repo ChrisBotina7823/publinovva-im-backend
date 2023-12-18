@@ -63,7 +63,7 @@ router.post('/wallet-transactions/:username/:dest', async (req, res) => {
         const { username, dest } = req.params
         const { transaction_amount, wallet_password } = req.body
         const type = dest == 'usd' ? 'usd-transfer' : 'inv-transfer'
-        const movement = await performTransaction( username, type, transaction_amount, wallet_password )
+        const movement = await performTransaction( username, type, parseFloat(transaction_amount), wallet_password )
         req.io.emit("usersUpdate")
         res.status(200).json(movement)
     } catch(err) {
@@ -75,7 +75,7 @@ router.post('/make-deposit/:username', async (req, res) => {
     try {
         const { username } = req.params
         const { transaction_amount } = req.body
-        const movement = await performTransaction(username, 'deposit', transaction_amount);
+        const movement = await performTransaction(username, 'deposit', parseFloat(transaction_amount));
         req.io.emit("movementsUpdate")
         res.status(200).json(movement)
     }    catch(err) {
@@ -87,7 +87,7 @@ router.post('/make-withdrawal/:username', async (req, res) => {
     try {
         const { username } = req.params
         const { transaction_amount, wallet_password } = req.body
-        const movement = await performTransaction(username, 'withdrawal', transaction_amount, wallet_password);
+        const movement = await performTransaction(username, 'withdrawal', parseFloat(transaction_amount), wallet_password);
         req.io.emit("movementsUpdate")
         res.status(200).json(movement)
     } catch(err) {
@@ -111,7 +111,7 @@ router.post('/approve-transaction/:id', async (req, res) => {
     try {
         const { received_amount } = req.body
         const { id } = req.params
-        const updatedTransaction = await approveTransaction(id, received_amount)
+        const updatedTransaction = await approveTransaction(id, parseFloat(received_amount))
         req.io.emit("clientsUpdate")
         req.io.emit("usersUpdate")
         req.io.emit("movementsUpdate") 
