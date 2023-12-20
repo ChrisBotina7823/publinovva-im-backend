@@ -141,7 +141,7 @@ const calculateRevenueTable = (investment) => {
             date: currentDate.toISOString(),
             days_diff,
             revenue_amount,
-            investment: investment._id
+            investment: investment.shortId || investment._id
         });
 
         currentDate.setDate(currentDate.getDate() + revenue_freq);
