@@ -39,7 +39,7 @@ const getInvestmentById = async (investmentId) => {
 }
 
 const getAllInvestments = async () => {
-    const inv =  await Investment.find({}).populate([{path:"client", select:"fullname"}, {path:"package", select:"name"}]).exec()
+    const inv =  await Investment.find({}).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name"}]).exec()
     inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
     return inv
 }
@@ -113,7 +113,7 @@ const calculateRevenue = async (investment) => {
 
 const getClientRevenueTable = async (id) => {
     const investments = await Investment.find({client:id})
-        .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"revenue_percentage revenue_freq"}])
+        .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"shortId revenue_percentage revenue_freq"}])
         .exec()
     const revenueTables = await Promise.all(investments.map(calculateRevenueTable));
     return revenueTables.flat();
