@@ -65,6 +65,7 @@ router.post('/wallet-transactions/:username/:dest', async (req, res) => {
         const type = dest == 'usd' ? 'usd-transfer' : 'inv-transfer'
         const movement = await performTransaction( username, type, parseFloat(transaction_amount), wallet_password )
         req.io.emit("usersUpdate")
+        req.io.emit("movementsUpdate")
         res.status(200).json(movement)
     } catch(err) {
         errorHandler(res, err)
