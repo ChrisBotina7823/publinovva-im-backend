@@ -44,6 +44,13 @@ const getAllInvestments = async () => {
     return inv
 }
 
+const getUserInvestments = async (user) => {
+    const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"client":user._id} : {}
+    const inv =  await Investment.find(condition).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name"}]).exec()
+    inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
+    return inv
+}
+
 const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
     let investmentInfo = {}
 
@@ -159,5 +166,6 @@ export {
     getAllInvestments,
     beginInvestment,
     updateInvestmentState,
-    getClientRevenueTable
+    getClientRevenueTable,
+    getUserInvestments
 }

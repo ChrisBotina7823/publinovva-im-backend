@@ -14,6 +14,17 @@ router.get('/', isAdminLogged, async (req, res) => {
     }
 })
 
+router.get('/user/:username', async (req, res) => {
+    try {
+        const { username } = req.params
+        const user = await getUserByUsername(username)
+        const investments = await getUserInvestments(user)
+        res.status(200).json(investments)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+} )
+
 router.get('/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params;
