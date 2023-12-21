@@ -29,13 +29,8 @@ const getWalletTransactionById = async (walletTransactionId) => {
 }
 
 const getUserTransactions = async (user) => {
-    return (
-        user?.__t == "Admin" ?
-        await WalletTransaction.find({admin:user._id}).populate([{path:"client", select:"shortId fullname"}, {path:"admin", select:"shortId entity_name"}]).exec()
-        : user?.__t == "Client" ?
-        await WalletTransaction.find({client:user._id}).populate([{path:"client", select:"shortId fullname"}, {path:"admin", select:"shortId entity_name"}]).exec()
-        : await WalletTransaction.find({}).populate([{path:"client", select:"shortId fullname"}, {path:"admin", select:"shortId entity_name"}]).exec()
-    )
+    const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"client":user._id} : {}    
+    return WalletTransaction.find(condition).populate([{path:"client", select:"shortId fullname"}, {path:"admin", select:"shortId entity_name"}]).exec()
 }
 
 const performTransaction = async (username, type, transaction_amount, wallet_password) => {
@@ -61,7 +56,7 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
             transactionInfo.dest_wallet = await getWalletById(client.i_wallet)
             transactionInfo.origin_wallet = await getWalletById(client.usd_wallet)
             transactionInfo.movement_state = "aprobado"
-            transactionType = 'transferencia a billetera de Inversiones'
+            transactionType = 'transferencia a billetera de Comercio'
             break
         case 'deposit':
             transactionInfo.dest_wallet = await getWalletById(client.usd_wallet)
