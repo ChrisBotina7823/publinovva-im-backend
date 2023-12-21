@@ -9,7 +9,7 @@ import {
 } from '../controller/package-controller.js';
 import { errorHandler, isAdminLogged } from '../middlewares/login-md.js';
 import { getAdminByUsername } from '../controller/admin-controller.js';
-import { getUserById } from '../controller/user-controller.js';
+import { getUserById, getUserByUsername } from '../controller/user-controller.js';
 
 const router = express.Router();
 
@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
 router.get('/user/:username', async (req, res) => {
     try {
         const { username } = req.params
-        const user = await getUserById(username)
+        const user = await getUserByUsername(username)
         const packages = await getUserPackages(user)
         res.status(200).json(packages)
     } catch(err) {
