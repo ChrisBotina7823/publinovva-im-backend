@@ -26,7 +26,7 @@ const getAllPackages = async () => {
 }
 
 const getUserPackages = async (user) => {
-    const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"client":user._id} : {}
+    const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"client":user.admin._id} : {}
     return await Package.find(condition)
 }
 
