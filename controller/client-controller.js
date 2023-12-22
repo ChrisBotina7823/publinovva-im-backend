@@ -21,7 +21,7 @@ const getClientByUsername = async (username) => {
     const user = await Client.findOne({ username })
         .populate([
             { path: "admin", select: "shortId username deposit_address deposit_qr" },
-            { path: "usd_wallet", select: "shortId available_amount" },
+            { path: "usd_wallet", select: "shortId available_amount address" },
             { path: "i_wallet", select: "shortId investment_amount available_amount" }
         ])
         .exec();
