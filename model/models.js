@@ -87,6 +87,7 @@ const Package = mongoose.model('Package', packageSchema);
 const walletSchema = new mongoose.Schema({
     type: { type: String, required: true, enum: ["USD", "INV"] },
     name: { type: String, required: true },
+    address: { type: String },
     password: { type: String, required: true },
     available_amount: { type: Number, default: 0 },
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
