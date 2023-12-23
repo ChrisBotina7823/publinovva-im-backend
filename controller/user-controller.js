@@ -1,7 +1,7 @@
 import { deleteFile, uploadFile } from '../helpers/drive-upload.js';
 import upload from '../helpers/multer-config.js';
 import { getIdFromUrl, getUrlFromId } from '../helpers/object-depuration.js';
-import { User }  from '../model/models.js';
+import { Investment, User }  from '../model/models.js';
 import { updateAdmin } from './admin-controller.js';
 import { updateClient } from './client-controller.js';
 
