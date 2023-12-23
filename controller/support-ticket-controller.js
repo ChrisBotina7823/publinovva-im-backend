@@ -45,13 +45,8 @@ const makeSupportTicket = async (username, description, category) => {
 }
 
 const getUserTickets = async (user) => {
-    return (
-        user?.__t == "Admin" ?
-        await SupportTicket.find({admin:user._id})
-        : user?.__t == "Client" ?
-        await SupportTicket.find({client:user._id})
-        : await SupportTicket.find({}) 
-    )
+    const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"client":user._id} : {}
+    return await SupportTicket.find(condition).populate([{path:"client", select:"fullname shortId"}, {path:"admin", select:"entity_name shortId"}]).exec()
 }
 
 export {

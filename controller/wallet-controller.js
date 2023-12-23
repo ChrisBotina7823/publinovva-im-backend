@@ -40,6 +40,7 @@ const assignWalletToClient = async (client, admin, usd_json, i_json) => {
     
     usd_wallet.client = i_wallet.client = client
     usd_wallet.admin = i_wallet.admin = admin
+    usd_wallet.address = usd_wallet._id.toString()
     await usd_wallet.save()
     await i_wallet.save()
 

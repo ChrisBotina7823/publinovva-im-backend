@@ -1,7 +1,8 @@
 import express from "express";
-import { beginInvestment, getAllInvestments, getClientRevenueTable, getInvestmentById, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
+import { beginInvestment, getAllInvestments, getClientRevenueTable, getInvestmentById, getUserInvestments, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
 import { errorHandler, isAdminLogged } from "../middlewares/login-md.js";
 import { getClientByUsername } from "../controller/client-controller.js";
+import { getUserByUsername } from "../controller/user-controller.js";
 
 const router = express.Router()
 
@@ -13,6 +14,17 @@ router.get('/', isAdminLogged, async (req, res) => {
         errorHandler(res, err)
     }
 })
+
+router.get('/user/:username', async (req, res) => {
+    try {
+        const { username } = req.params
+        const user = await getUserByUsername(username)
+        const investments = await getUserInvestments(user)
+        res.status(200).json(investments)
+    } catch(err) {
+        errorHandler(res, err)
+    }
+} )
 
 router.get('/:id', isAdminLogged, async (req, res) => {
     try {

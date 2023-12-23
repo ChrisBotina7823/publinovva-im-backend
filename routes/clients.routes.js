@@ -76,12 +76,13 @@ router.put('/:username', async (req, res) => {
         const updatedClient = await updateClient(username, clientInfo)
 
         // Wallet Information
-        const { usd_balance = undefined } = req.body
+        const { usd_balance = undefined, usd_address = undefined } = req.body
         const { i_password = undefined, usd_password = undefined } = req.body 
         if(usd_balance) await updateWalletById(updatedClient.usd_wallet.toString(), {available_amount: usd_balance})
         if(i_password) await updateWalletById(updatedClient.i_wallet.toString(), {password: await encryptPassword(i_password)})
         if(usd_password) await updateWalletById(updatedClient.usd_wallet.toString(), {password: await encryptPassword(usd_password)})
-        
+        if(usd_address) await updateWalletById(updatedClient.usd_wallet.toString(), {address: usd_address})
+
         req.io.emit("clientsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedClient)

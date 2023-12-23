@@ -39,8 +39,20 @@ const getInvestmentById = async (investmentId) => {
 }
 
 const getAllInvestments = async () => {
-    const inv =  await Investment.find({}).populate([{path:"client", select:"fullname"}, {path:"package", select:"name"}]).exec()
+    const inv =  await Investment.find({}).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name"}]).exec()
     inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
+    return inv
+}
+
+const getUserInvestments = async (user) => {
+    const condition = user.__t == "Client"  ? {"client":user._id} : {}
+    let inv =  await Investment.find(condition).populate([{path:"client", select:"shortId fullname admin"}, {path:"package", select:"shortId name"}]).exec()
+    inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
+
+    if(user.__t == "Admin") {
+        inv = inv.filter( i => i.client?.admin == user._id.toString() )
+    }
+
     return inv
 }
 
@@ -113,7 +125,7 @@ const calculateRevenue = async (investment) => {
 
 const getClientRevenueTable = async (id) => {
     const investments = await Investment.find({client:id})
-        .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"revenue_percentage revenue_freq"}])
+        .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"shortId revenue_percentage revenue_freq"}])
         .exec()
     const revenueTables = await Promise.all(investments.map(calculateRevenueTable));
     return revenueTables.flat();
@@ -141,7 +153,7 @@ const calculateRevenueTable = (investment) => {
             date: currentDate.toISOString(),
             days_diff,
             revenue_amount,
-            investment: investment._id
+            investment: investment.shortId || investment._id
         });
 
         currentDate.setDate(currentDate.getDate() + revenue_freq);
@@ -159,5 +171,6 @@ export {
     getAllInvestments,
     beginInvestment,
     updateInvestmentState,
-    getClientRevenueTable
+    getClientRevenueTable,
+    getUserInvestments
 }
