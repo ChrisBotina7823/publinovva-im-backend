@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 
-import { config } from 'dotenv'
+import { config, parse } from 'dotenv'
+import { parseUsername } from '../helpers/object-depuration.js'
 config()
 
 const isUserLogged = async (req, res, next) => {
@@ -37,9 +38,20 @@ const errorHandler = (res, err) => {
     res.status(400).json({ error: err.message });
 };
 
+const parseUsernameMD = (req, res, next) => {
+    const { username: usernameBody = undefined } = req.body
+    const { username: usernameParams = undefined, prevUsername = undefined } = req.params
+    if(usernameBody) req.body.username = parseUsername(usernameBody)
+    if(usernameParams) req.params.username = parseUsername(usernameParams)
+    if(prevUsername) req.params.prevUsername = parseUsername(prevUsername)
+    console.log(usernameBody)
+    next()
+}
+
 export {
     isUserLogged,
     isAdminLogged,
     isSuperUserLogged,
-    errorHandler   
+    errorHandler,
+    parseUsernameMD
 }

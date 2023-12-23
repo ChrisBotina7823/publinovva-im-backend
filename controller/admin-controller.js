@@ -1,18 +1,22 @@
+import { parseUsername } from '../helpers/object-depuration.js';
 import { Admin, Client, Package }  from '../model/models.js';
 
 // Insert a new admin (inherits from User)
 const insertAdmin = async (adminJson) => {
+    adminJson.username = parseUsername(adminJson.username)
     const admin = new Admin(adminJson);
     return await admin.save();
 }
 
 // Update admin by username
 const updateAdmin = async (username, updatedData) => {
+    username = parseUsername(username)
     return await Admin.findOneAndUpdate({ username }, updatedData, { new: true });
 }
 
 // Delete admin by username
 const deleteAdmin = async (username) => {
+    username = parseUsername(username)
     return await Admin.findOneAndDelete({ username });
 }
 

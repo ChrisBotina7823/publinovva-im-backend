@@ -26,6 +26,7 @@ app.use((req, res, next) => {
     req.io = io;
     next();
 });
+app.use(parseUsernameMD)
 
 // Set routes
 import indexRouter from './routes/index.routes.js';
@@ -42,7 +43,7 @@ app.use(indexRouter);
 app.use('/auth/', authRouter);
 
 // the following routes require the user to be authenticated
-import { isUserLogged } from "./middlewares/login-md.js";
+import { isUserLogged, parseUsernameMD } from "./middlewares/login-md.js";
 import { getAllClients } from "./controller/client-controller.js";
 app.use(isUserLogged);
 

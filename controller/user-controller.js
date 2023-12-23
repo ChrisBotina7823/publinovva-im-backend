@@ -11,8 +11,7 @@ const insertUser = async (userJson) => {
 }
 
 const updateUser = async (username, updatedData) => {
-    await User.findOneAndUpdate({ username }, updatedData);
-    return await User.findOne({ username });
+    return await User.findOneAndUpdate({ username }, updatedData);
 }
 
 const deleteUser = async (username) => {

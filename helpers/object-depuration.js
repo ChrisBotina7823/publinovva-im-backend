@@ -29,10 +29,15 @@ const calculateDayDiff = (start_date, end_date) => {
   return dayDiff
 }
 
+const parseUsername = (username) => {
+  return username.toLowerCase().replace(/\s/g, '');
+}
+
 export {
     filterObject,
     getIdFromUrl,
     getUrlFromId,
     checkObj,
-    calculateDayDiff
+    calculateDayDiff,
+    parseUsername
 }
