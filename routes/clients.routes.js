@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 router.post('/', isAdminLogged, async (req, res) => {
     try {
         const { username, password, email, profile_picture = undefined, fullname, country, phone } = req.body
-        const { usd_name, usd_password, i_name, i_password, admin_username } = req.body
+        const { usd_name, usd_password, i_name, i_password } = req.body
         let newClient = {
             username,
             password: await encryptPassword(password),
@@ -29,8 +29,7 @@ router.post('/', isAdminLogged, async (req, res) => {
             country,
             phone,
         }
-        const admin = await getAdminByUsername(admin_username)
-        if(!admin) throw new Error(`Client must be assigned to an admin`)
+        const admin = await getAdminByUsername(req.user.username)
         newClient.admin = admin
 
         const usd_wallet = {
@@ -45,12 +44,7 @@ router.post('/', isAdminLogged, async (req, res) => {
         }
         
         const client = await insertClient(newClient)
-        assignWalletToClient(client, admin, usd_wallet, i_wallet)
-            .then(
-                () => {
-                   console.log("Wallet assigned") 
-                }
-            )
+        await assignWalletToClient(client, admin, usd_wallet, i_wallet)
         req.io.emit("clientsUpdate")
         res.status(200).json(client) 
     } catch(err) {
