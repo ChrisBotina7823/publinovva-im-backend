@@ -66,6 +66,7 @@ const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
     investmentInfo.wallet = client.i_wallet
     const inv_package = await getPackageById(package_id)
     checkObj(inv_package, "inv_package")
+    const admin = await getUserById(client.admin)
     investmentInfo.package = inv_package
 
     if(inv_amount > wallet.available_amount) throw new Error(`No hay suficiente dinero en la billetera ${wallet._id}`)
@@ -79,7 +80,7 @@ const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
 
     const investment = await insertInvestment(investmentInfo)
     sendEmail(client.email, "Solicitud de Inversión", "¡Hola! Tu solicitud de inversión se ha realizado correctamente. Se notificará al administrador para que responda a tu solicitud")
-    sendEmail(client.email, "Solicitud de Inversión", `El cliente identificado con usuario ${client.username} ha realizado una solicitud de inversión. Revisa la plataforma para evaluar la solicitud`)
+    sendEmail(admin.email, "Solicitud de Inversión", `El cliente identificado con usuario ${client.username} ha realizado una solicitud de inversión. Revisa la plataforma para evaluar la solicitud`)
 
     return investment
 

@@ -30,7 +30,7 @@ const getClientByUsername = async (username) => {
 
 const getClientMovements = async (username) => {
     return await Movement.find({client: await getClientByUsername(username)})
-}
+}   
 
 const getAllClients = async () => {
     const clients = await Client.find({})
