@@ -19,7 +19,6 @@ const corsOptions = {
 
 
 const io = new Server(server, {cors:corsOptions});
-app.use(cors(corsOptions));
 
 // Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
