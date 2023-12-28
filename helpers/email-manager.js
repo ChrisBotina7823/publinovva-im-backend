@@ -20,7 +20,12 @@ const sendEmail = async (dest_email, subject, text) => {
         text
     }
 
-    return await transporter.sendMail(options)
+    try {
+        return await transporter.sendMail(options)
+    } catch(err) {
+        console.error(err)
+        return null
+    }
 }
 
 export {

@@ -79,6 +79,7 @@ const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
     if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package.name} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
 
     const investment = await insertInvestment(investmentInfo)
+    console.log(admin.email)
     sendEmail(client.email, "Solicitud de Inversión", "¡Hola! Tu solicitud de inversión se ha realizado correctamente. Se notificará al administrador para que responda a tu solicitud")
     sendEmail(admin.email, "Solicitud de Inversión", `El cliente identificado con usuario ${client.username} ha realizado una solicitud de inversión. Revisa la plataforma para evaluar la solicitud`)
 
