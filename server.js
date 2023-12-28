@@ -12,13 +12,19 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 const corsOptions = {
-    origin: ["https://publinovva-im-frontend-production.up.railway.app", "http://localhost"],
+    origin: "*",
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
 
-
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'https://publinovva-im-frontend-production.up.railway.app');
+    next();
+  });
+  
 const io = new Server(server, {cors:corsOptions});
+
 
 // Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -44,7 +44,6 @@ const parseUsernameMD = (req, res, next) => {
     if(usernameBody) req.body.username = parseUsername(usernameBody)
     if(usernameParams) req.params.username = parseUsername(usernameParams)
     if(prevUsername) req.params.prevUsername = parseUsername(prevUsername)
-    console.log(usernameBody)
     next()
 }
 

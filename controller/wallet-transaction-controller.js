@@ -89,8 +89,10 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
     const destInfo = dest_wallet ? `\n - Billetera destino: ${dest_wallet._id} (${dest_wallet.type})` : ""
     const emailDesc = `Se ha realizado una solicitud de ${transactionType}\n - Cliente: ${username}\n - Monto: ${transaction_amount}${originInfo}${destInfo}`
 
-    sendEmail(client.email, `Solicitud de ${transactionType} realizada`, emailDesc)
-    sendEmail(admin.email, `Solicitud de ${transactionType}`, emailDesc)
+    if(type != 'usd-transfer' && type != 'inv-transfer') {
+        sendEmail(client.email, `Solicitud de ${transactionType} realizada`, emailDesc)
+        sendEmail(admin.email, `Solicitud de ${transactionType}`, emailDesc)
+    }
 
     return await insertWalletTransaction(transactionInfo);
 };
