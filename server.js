@@ -19,7 +19,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://publinovva-im-frontend-production.up.railway.app');
+    res.header('Access-Control-Allow-Origin', '*');
     next();
   });
   
