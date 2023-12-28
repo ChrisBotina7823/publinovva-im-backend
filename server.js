@@ -12,10 +12,11 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 const corsOptions = {
-    origin: '*',
+    origin: ["https://publinovva-im-frontend-production.up.railway.app", "http://localhost"],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
+
 
 const io = new Server(server, {cors:corsOptions});
 app.use(cors(corsOptions));
