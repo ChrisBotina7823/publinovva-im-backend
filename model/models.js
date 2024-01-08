@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true },
     profile_picture: { type: String, default: "" },
     recovery_token: { type: String, default: "" },
+    passwordVersion: {type: Number, default: 0},
 });
 
 addShortIdToSchema(userSchema);

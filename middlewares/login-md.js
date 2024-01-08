@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 
 import { config, parse } from 'dotenv'
 import { parseUsername } from '../helpers/object-depuration.js'
+import { getUserByUsername } from '../controller/user-controller.js'
 config()
 
 const isUserLogged = async (req, res, next) => {
@@ -9,12 +10,18 @@ const isUserLogged = async (req, res, next) => {
     if (!token) return res.status(401).json('Unauthorized user')
     try {
         const decoded = jwt.verify(token, process.env.USER_SECRET)
+
+        const user = await getUserByUsername(decoded.username);
+        if (!user || user.passwordVersion !== decoded.version) {
+            throw new Error('Token not valid');
+        }
+
         req.user = decoded
         next()
     } catch (err) {
         console.error(err)
         res.status(401).json('Token not valid')
-    } 
+    }
 }
 
 const isAdminLogged = async (req, res, next) => {

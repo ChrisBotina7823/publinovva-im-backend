@@ -4,6 +4,7 @@ import { deleteClient, insertClient, updateClient, getAllClients, getClientByUse
 import { errorHandler, isAdminLogged, isUserLogged } from '../middlewares/login-md.js'
 import { assignWalletToClient, updateWallet, updateWalletById } from '../controller/wallet-controller.js'
 import { getAdminByUsername } from '../controller/admin-controller.js'
+import { getUserByUsername } from '../controller/user-controller.js'
 
 const router = express.Router()
 
@@ -66,7 +67,11 @@ router.put('/:username', async (req, res) => {
     try {
         const { username } = req.params
         const clientInfo = req.body
-        if(clientInfo.password) clientInfo.password = await encryptPassword(clientInfo.password) 
+        const prevUser = await getUserByUsername(username)
+        if(clientInfo.password) {
+            clientInfo.password = await encryptPassword(clientInfo.password) 
+            clientInfo.passwordVersion = prevUser.passwordVersion+1;
+        }
         const updatedClient = await updateClient(username, clientInfo)
 
         // Wallet Information

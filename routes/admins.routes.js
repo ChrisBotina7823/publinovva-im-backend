@@ -3,7 +3,7 @@ import { encryptPassword } from '../helpers/encryption.js';
 import { deleteAdmin, insertAdmin, updateAdmin, getAdminByUsername, getAllAdmins, getAdminClients } from '../controller/admin-controller.js';
 import { errorHandler, isAdminLogged, isSuperUserLogged } from '../middlewares/login-md.js';
 import upload from '../helpers/multer-config.js';
-import { updateFileAttribute } from '../controller/user-controller.js';
+import { getUserByUsername, updateFileAttribute } from '../controller/user-controller.js';
 import { config } from 'dotenv';
 import { getAllClients } from '../controller/client-controller.js';
 config()
@@ -68,7 +68,11 @@ router.put('/:username', isAdminLogged, async (req, res, next) => {
     try {
         const { username } = req.params
         let adminInfo = req.body
-        if(adminInfo.password) adminInfo.password = await encryptPassword(adminInfo.password) 
+        const prevUser = await getUserByUsername(username)
+        if(adminInfo.password) {
+            adminInfo.password = await encryptPassword(adminInfo.password)
+            adminInfo.passwordVersion = prevUser.passwordVersion+1
+        } 
         const updatedAdmin = await updateAdmin(username, adminInfo);
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
