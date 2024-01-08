@@ -14,6 +14,10 @@ import { getMovementsByUser } from '../controller/movement-controller.js'
 
 // CRUD ROUTES
 
+router.get('/validate-token', async (req, res) => {
+    res.status(200).json("Nice")
+})
+
 router.get('/', async (req, res) => {
     try {
         const users = await getAllUsers()

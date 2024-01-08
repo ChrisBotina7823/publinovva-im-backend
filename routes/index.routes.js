@@ -12,15 +12,8 @@ import { parseUsername } from '../helpers/object-depuration.js'
 config()
 
 router.get('/', async (req, res) => {
-    const users = await getAllUsers();
-    for(const user of users) {
-        const username = parseUsername(user.username)
-        await updateUser(user.username, {username})
-    }
-    const newUsers = await getAllUsers()
-    res.status(200).json({newUsers})
+    res.status(200).json("Hello")
 })
-
 
 router.post('/', upload.single('profile_picture'), async (req, res) => {
     const profile_picture = req.file
