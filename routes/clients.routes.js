@@ -70,7 +70,7 @@ router.put('/:username', async (req, res) => {
         const prevUser = await getUserByUsername(username)
         if(clientInfo.password) {
             clientInfo.password = await encryptPassword(clientInfo.password) 
-            clientInfo.passwordVersion = prevUser.passwordVersion+1;
+            clientInfo.passwordVersion = (prevUser.passwordVersion || 0) + 1;
         }
         const updatedClient = await updateClient(username, clientInfo)
 
