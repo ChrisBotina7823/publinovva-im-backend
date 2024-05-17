@@ -16,7 +16,7 @@ const getIdFromUrl = (url) => {
 }
 
 const getUrlFromId = (fileId) => {
-  return `https://drive.google.com/uc?export=view&id=${fileId}`
+  return `https://drive.lienuc.com/uc?id=${fileId}`
 }
 
 const checkObj = (obj, prototype) => {
