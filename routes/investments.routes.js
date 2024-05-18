@@ -1,6 +1,7 @@
 import express from "express";
 import { beginInvestment, getAllInvestments, getClientRevenueTable, getInvestmentById, getUserInvestments, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
 import { errorHandler, isAdminLogged } from "../middlewares/login-md.js";
+import { getUserById } from "../controller/user-controller.js";
 
 const router = express.Router()
 
