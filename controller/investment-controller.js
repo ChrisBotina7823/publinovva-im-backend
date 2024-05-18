@@ -55,7 +55,7 @@ const getUserInvestments = async (user) => {
     return inv
 }
 
-const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
+const beginInvestment = async (id, end_date, package_id, inv_amount ) => {
     let investmentInfo = {}
 
     const client = await getUserById(id)
