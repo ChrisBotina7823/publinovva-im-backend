@@ -22,6 +22,12 @@ router.get('/', async (req, res) => {
     res.status(200).json("Hello")
 })
 
+router.post('/styles/:admin_id', async (req, res) => {
+    const { admin_id } = req.params
+    const admin = await Admin.findById(admin_id).populate('profile_picture entity_name')
+    return admin
+})
+
 router.post('/', upload.single('profile_picture'), async (req, res) => {
     const profile_picture = req.file
     await uploadFile(profile_picture, process.env.DRIVE_BASE_FOLDER_ID)
