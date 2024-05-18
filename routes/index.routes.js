@@ -1,6 +1,6 @@
 import express from 'express'
 const router = express.Router()
-import { isUserLogged } from '../middlewares/login-md.js'
+import { errorHandler, isUserLogged } from '../middlewares/login-md.js'
 import { getAdminByUsername } from '../controller/admin-controller.js'
 import { getAllUsers, getUserByUsername, updateUser } from '../controller/user-controller.js'
 import { sendEmail } from '../helpers/email-manager.js'
@@ -22,11 +22,16 @@ router.get('/', async (req, res) => {
     res.status(200).json("Hello")
 })
 
-router.post('/styles/:admin_id', async (req, res) => {
-    const { admin_id } = req.params
-    const admin = await Admin.findById(admin_id).populate('profile_picture entity_name')
-    return admin
+router.get('/styles/:admin_id', async (req, res) => {
+    try {
+        const { admin_id } = req.params
+        const admin = await Admin.findById(admin_id).select("profile_picture entity_name")
+        res.json(admin) 
+    } catch(err) {
+        errorHandler(res, err)
+    }
 })
+
 
 router.post('/', upload.single('profile_picture'), async (req, res) => {
     const profile_picture = req.file
