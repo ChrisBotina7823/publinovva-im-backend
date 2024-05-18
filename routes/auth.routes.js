@@ -18,7 +18,7 @@ router.post('/superuser', async (req, res) => {
     await loginUser(req, res, getSuperUserByUsername);
 });
 
-router.post('/client', async (req, res) => {
+router.post('/client/:admin_id', async (req, res) => {
     await loginUser(req, res, getClientByKey);
 });
 

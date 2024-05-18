@@ -8,8 +8,9 @@ config()
 const loginUser = async (req, res, getUser) => {
     try {
         const { username, password } = req.body;
+        const { admin_id } = req.params;
         const info = { username, password }
-        const user = await getUser(info.username)
+        const user = admin_id ? await getUser(info.username, admin_id) : await getUser(info.username)
 
         if (!user) userNotFound(info.username)
         const match = await checkPassword(info.password, user.password)
