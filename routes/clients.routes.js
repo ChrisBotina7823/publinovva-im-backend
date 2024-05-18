@@ -73,10 +73,12 @@ router.put('/:id', async (req, res) => {
             clientInfo.passwordVersion = (prevUser.passwordVersion || 0) + 1;
         }
         const updatedClient = await updateClient(id, clientInfo)
+        console.log(updatedClient)
 
         // Wallet Information
         const { usd_balance = undefined, usd_address = undefined } = req.body
         const { i_password = undefined, usd_password = undefined } = req.body 
+        console.log(updateClient)
         if(usd_balance) await updateWalletById(updatedClient.usd_wallet.toString(), {available_amount: usd_balance})
         if(i_password) await updateWalletById(updatedClient.i_wallet.toString(), {password: await encryptPassword(i_password)})
         if(usd_password) await updateWalletById(updatedClient.usd_wallet.toString(), {password: await encryptPassword(usd_password)})

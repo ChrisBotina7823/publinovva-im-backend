@@ -7,13 +7,13 @@ const insertClient = async (clientJson) => {
 }
 
 // Update client by username
-const updateClient = async (username, updatedData) => {
-    return await Client.findOneAndUpdate({ username }, updatedData, { new: true });
+const updateClient = async (id, updatedData) => {
+    return await Client.findByIdAndUpdate( id, updatedData, { new: true });
 }
 
 // Delete client by username
-const deleteClient = async (username) => {
-    return await Client.findOneAndDelete({ username });
+const deleteClient = async (id) => {
+    return await Client.findByIdAndDelete(id);
 }
 
 // Get client by username
@@ -28,8 +28,8 @@ const getClientByUsername = async (username) => {
     return user
 }
 
-const getClientMovements = async (username) => {
-    return await Movement.find({client: await getClientByUsername(username)})
+const getClientMovements = async (id) => {
+    return await Movement.find({client: await getUserById(id)})
 }   
 
 const getAllClients = async () => {

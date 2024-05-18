@@ -10,12 +10,12 @@ const insertAdmin = async (adminJson) => {
 
 // Update admin by username
 const updateAdmin = async (id, updatedData) => {
-    return await Admin.findByIdAndUpdate({ id }, updatedData, { new: true });
+    return await Admin.findByIdAndUpdate(id, updatedData, { new: true });
 }
 
 // Delete admin by username
 const deleteAdmin = async (id) => {
-    return await Admin.findByIdAndRemove({ id });
+    return await Admin.findByIdAndDelete(id);
 }
 
 // Get admin by username

@@ -6,6 +6,7 @@ import upload from '../helpers/multer-config.js';
 import { getUserById, updateFileAttribute } from '../controller/user-controller.js';
 import { config } from 'dotenv';
 import { getAllClients } from '../controller/client-controller.js';
+
 config()
 
 const router = express.Router();
@@ -31,7 +32,7 @@ router.get('/clients', isAdminLogged, async (req, res) => {
 router.get('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
-        const admin = await getAdminById(id);
+        const admin = await getUserById(id);
         res.status(200).json(admin);
     } catch (err) {
         errorHandler(res, err)
