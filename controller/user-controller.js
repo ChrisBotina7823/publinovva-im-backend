@@ -66,6 +66,7 @@ const updateFileAttribute = async (username, folderId, file, attribute) => {
                 console.log(`File deleted from drive for ${attribute}`);
             }
         )
+    console.log(previewLink)
     if(user.__t == "Admin") {
         return await updateAdmin(username, {[attribute]:previewLink})
     } else if(user.__t == "Client") {

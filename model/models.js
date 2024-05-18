@@ -49,8 +49,8 @@ const User = mongoose.model('User', userSchema);
 // Admin Model (Inherits from User)
 const adminSchema = new mongoose.Schema({
     entity_name: { type: String, required: true },
-    deposit_address: { type: String, required: true },
-    etherium_qr: { type: String, default: "" },
+    ethereum_address: { type: String, required: true },
+    ethereum_qr: { type: String, default: "" },
     btc_address: { type: String },
     btc_qr: { type: String, default: "" },
     available_days: { type: Number, required: true, default: 0 },

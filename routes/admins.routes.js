@@ -56,6 +56,7 @@ router.post('/ethereum-qr/:username', upload.single('ethereum_qr'), async (req, 
     try {
         const { username } = req.params;
         const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'ethereum_qr');
+        console.log(updatedAdmin)
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
