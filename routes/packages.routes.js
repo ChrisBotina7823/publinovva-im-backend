@@ -37,10 +37,10 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/user/:username', async (req, res) => {
+router.get('/user/:id', async (req, res) => {
     try {
-        const { username } = req.params
-        const user = await getUserByUsername(username)
+        const { id } = req.params
+        const user = await getUserById(id)
         const packages = await getUserPackages(user)
         res.status(200).json(packages)
     } catch(err) {

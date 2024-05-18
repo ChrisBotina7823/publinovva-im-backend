@@ -45,7 +45,12 @@ const getAllClients = async () => {
 }
 
 const getClientByKey = async (username, admin_id) => {
-    return await Client.findOne({ username, admin: admin_id })
+    const user = await Client.findOne({ username, admin: admin_id })
+    if(user) {
+        const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
+        await User.populate(user, populateFields);
+    }
+    return user
 }
 
 export {
