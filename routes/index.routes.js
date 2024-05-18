@@ -24,9 +24,20 @@ router.get('/', async (req, res) => {
 
 router.get('/styles/:admin_id', async (req, res) => {
     try {
-        const { admin_id } = req.params
-        const admin = await Admin.findById(admin_id).select("profile_picture entity_name")
-        res.json(admin) 
+        const { admin_id } = req.params;
+        let conditions = [ {_id: admin_id}, {username: parseUsername(admin_id)}, {shortId: admin_id}]
+        for (const condition of conditions) {
+            try {
+                const admin = await Admin.findOne(condition).select("profile_picture entity_name shortId")
+                if(admin) {
+                    res.json(admin)
+                    return
+                }
+            } catch(err) {
+                continue
+            }
+        }
+        res.status(404).json({message:"Admin not found"})
     } catch(err) {
         errorHandler(res, err)
     }
