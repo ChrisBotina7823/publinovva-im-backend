@@ -50,7 +50,9 @@ const User = mongoose.model('User', userSchema);
 const adminSchema = new mongoose.Schema({
     entity_name: { type: String, required: true },
     deposit_address: { type: String, required: true },
-    deposit_qr: { type: String, default: "" },
+    etherium_qr: { type: String, default: "" },
+    btc_address: { type: String },
+    btc_qr: { type: String, default: "" },
     available_days: { type: Number, required: true, default: 0 },
     account_state: { type: String, required: true, default: "activo", enum: ["activo", "suspendido"] },
 });

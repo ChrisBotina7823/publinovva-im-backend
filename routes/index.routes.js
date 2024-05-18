@@ -7,11 +7,18 @@ import { sendEmail } from '../helpers/email-manager.js'
 import upload from '../helpers/multer-config.js'
 import { uploadFile } from '../helpers/drive-upload.js'
 import { config } from 'dotenv'
-import { Investment } from '../model/models.js'
-import { parseUsername } from '../helpers/object-depuration.js'
+import { Admin, User } from '../model/models.js'
+import { getIdFromUrl, parseUsername } from '../helpers/object-depuration.js'
+import { getUrlFromId } from '../helpers/object-depuration.js'
 config()
 
 router.get('/', async (req, res) => {
+    const users = await Admin.find()
+    for (const user of users) {
+        user.btc_qr = user.deposit_qr
+        user.btc_address = user.deposit_address
+        await user.save()
+    }
     res.status(200).json("Hello")
 })
 
