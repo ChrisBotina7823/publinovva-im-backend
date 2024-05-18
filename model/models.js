@@ -35,7 +35,7 @@ const addShortIdToSchema = (schema) => {
 
 // User Model
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: true,  },
     password: { type: String, required: true },
     email: { type: String, required: true },
     profile_picture: { type: String, default: "" },
@@ -49,9 +49,9 @@ const User = mongoose.model('User', userSchema);
 // Admin Model (Inherits from User)
 const adminSchema = new mongoose.Schema({
     entity_name: { type: String, required: true },
-    ethereum_address: { type: String, required: true },
+    ethereum_address: { type: String, default:"" },
     ethereum_qr: { type: String, default: "" },
-    btc_address: { type: String },
+    btc_address: { type: String, default:"" },
     btc_qr: { type: String, default: "" },
     available_days: { type: Number, required: true, default: 0 },
     account_state: { type: String, required: true, default: "activo", enum: ["activo", "suspendido"] },
@@ -69,6 +69,8 @@ const clientSchema = new mongoose.Schema({
     usd_wallet: { type: mongoose.Schema.Types.ObjectId, ref: 'Wallet' },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }
 });
+
+clientSchema.index({ username: 1, admin: 1 }, { unique: true });
 
 const Client = User.discriminator('Client', clientSchema);
 

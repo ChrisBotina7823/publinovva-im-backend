@@ -10,12 +10,12 @@ const insertUser = async (userJson) => {
     return await user.save();
 }
 
-const updateUser = async (username, updatedData) => {
-    return await User.findOneAndUpdate({ username }, updatedData);
+const updateUser = async (id, updatedData) => {
+    return await User.findByIdAndUpdate({ id }, updatedData);
 }
 
-const deleteUser = async (username) => {
-    return await User.findOneAndDelete({ username });
+const deleteUser = async (id) => {
+    return await User.findByIdAndRemove({ id });
 }
 
 const getUserByUsername = async (username) => {
@@ -48,11 +48,11 @@ const getUserByRecoveryToken = async (recovery_token) => {
     return await User.findOne({recovery_token}) 
 }
 
-const updateFileAttribute = async (username, folderId, file, attribute) => {
+const updateFileAttribute = async (id, folderId, file, attribute) => {
     const fileId = await uploadFile(file, folderId);
     const previewLink = getUrlFromId(fileId);
 
-    const user = await getUserByUsername(username);
+    const user = await getUserById(id);
     const previousImg = user[attribute];
 
     upload.deleteFile(file.path)
@@ -68,11 +68,11 @@ const updateFileAttribute = async (username, folderId, file, attribute) => {
         )
     console.log(previewLink)
     if(user.__t == "Admin") {
-        return await updateAdmin(username, {[attribute]:previewLink})
+        return await updateAdmin(id, {[attribute]:previewLink})
     } else if(user.__t == "Client") {
-        return await updateClient(username, {[attribute]:previewLink})
+        return await updateClient(id, {[attribute]:previewLink})
     } else {
-        return await updateUser(username, {[attribute]:previewLink})
+        return await updateUser(id, {[attribute]:previewLink})
     }
 }
 

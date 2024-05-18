@@ -64,14 +64,14 @@ router.post('/', async (req, res) => {
 
 router.put('/:prevUsername', async (req, res) => {
     try {
-        const { prevUsername } = req.params;
+        const { prevId } = req.params;
         // A user in general can only edit his profile.
         // A superuser can edit anyone's profile
-        if(req.user.__t && req.user.username != prevUsername) throw new Error(`You do not have the permissions to edit this profile`)
+        if(req.user.__t && req.user._id != prevId) throw new Error(`You do not have the permissions to edit this profile`)
         
-        if(req.user.__t == 'Admin' && req.user.username != prevUsername) {
-            const adminUsers = ( await getAdminClients(req.user.username) )
-            const prevUser = adminUsers.find( u => u.username = prevUsername )
+        if(req.user.__t == 'Admin' && req.user._id != prevId) {
+            const adminUsers = ( await getAdminClients(req.user._id) )
+            const prevUser = adminUsers.find( u => u._id = prevId )
             if(!prevUser) throw new Error(`You do not have permissions to edit this client`)
         }
 
@@ -81,7 +81,7 @@ router.put('/:prevUsername', async (req, res) => {
             email,
             profile_picture
         };
-        const updatedUser = await updateUser(prevUsername, newUser);
+        const updatedUser = await updateUser(prevId, newUser);
         res.status(200).json(updatedUser);
     } catch (err) {
         errorHandler(res, err)

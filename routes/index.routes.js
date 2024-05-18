@@ -15,8 +15,8 @@ config()
 router.get('/', async (req, res) => {
     const users = await Admin.find()
     for (const user of users) {
-        user.btc_qr = user.deposit_qr
-        user.btc_address = user.deposit_address
+        user.ethereum_qr = user.etherium_qr
+        user.ethereum_address = user.etherium_address
         await user.save()
     }
     res.status(200).json("Hello")

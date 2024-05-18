@@ -44,7 +44,7 @@ const assignWalletToClient = async (client, admin, usd_json, i_json) => {
     await usd_wallet.save()
     await i_wallet.save()
 
-    return await updateClient(client.username, {usd_wallet, i_wallet})
+    return await updateClient(client._id, {usd_wallet, i_wallet})
 }
 
 const getAllWallets = async () => {

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 
 import { config, parse } from 'dotenv'
 import { parseUsername } from '../helpers/object-depuration.js'
-import { getUserByUsername } from '../controller/user-controller.js'
+import { getUserById, getUserByUsername } from '../controller/user-controller.js'
 config()
 
 const isUserLogged = async (req, res, next) => {
@@ -11,7 +11,7 @@ const isUserLogged = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.USER_SECRET)
 
-        const user = await getUserByUsername(decoded.username);
+        const user = await getUserById(decoded._id);
         if (!user || user.passwordVersion !== decoded.version) {
             throw new Error('Token not valid');
         }

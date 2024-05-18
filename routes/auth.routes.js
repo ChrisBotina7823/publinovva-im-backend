@@ -67,7 +67,7 @@ router.post('/reset-password/:token', async (req, res) => {
         let { password } = req.body
         const user = await getUserByRecoveryToken(token) 
         password = await encryptPassword(password)
-        await updateUser(user.username, {password, recovery_token:""})
+        await updateUser(user._id, {password, recovery_token:""})
         res.status(200).json({message: "Password changed successfully"})
     } catch(err) {
         errorHandler(res, err)

@@ -9,24 +9,23 @@ const insertAdmin = async (adminJson) => {
 }
 
 // Update admin by username
-const updateAdmin = async (username, updatedData) => {
-    username = parseUsername(username)
-    return await Admin.findOneAndUpdate({ username }, updatedData, { new: true });
+const updateAdmin = async (id, updatedData) => {
+    return await Admin.findByIdAndUpdate({ id }, updatedData, { new: true });
 }
 
 // Delete admin by username
-const deleteAdmin = async (username) => {
-    username = parseUsername(username)
-    return await Admin.findOneAndDelete({ username });
+const deleteAdmin = async (id) => {
+    return await Admin.findByIdAndRemove({ id });
 }
 
 // Get admin by username
 const getAdminByUsername = async (username) => {
+    username = parseUsername(username)
     return await Admin.findOne({ username });
 }
 
-const getAdminClients = async (username) => {
-    const clients = await Client.find({ admin: await getAdminByUsername(username) })
+const getAdminClients = async (id) => {
+    const clients = await Client.find({ admin: await Admin.findById(id) })
       .populate([
           { path: "admin", select: "shortId username btc_address btc_qr ethereum_address ethereum_qr" },
           { path: "usd_wallet", select: "shortId available_amount" },

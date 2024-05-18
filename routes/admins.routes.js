@@ -21,7 +21,7 @@ router.get('/', isSuperUserLogged, async (req, res) => {
 
 router.get('/clients', isAdminLogged, async (req, res) => {
     try {
-        const clients = req.user.__t ? (await getAdminClients(req.user.username)) : (await getAllClients())
+        const clients = req.user.__t ? (await getAdminClients(req.user._id)) : (await getAllClients())
         res.status(200).json(clients)  
     } catch( err ) {
         errorHandler(res, err)
