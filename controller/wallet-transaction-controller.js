@@ -3,7 +3,6 @@ import { Wallet, WalletTransaction } from "../model/models.js";
 import { getWalletById, updateWalletById } from "./wallet-controller.js";
 import { checkPassword } from "../helpers/encryption.js"
 import { sendEmail } from "../helpers/email-manager.js";
-import { getAdminByUsername } from "./admin-controller.js";
 import { getUserById } from "./user-controller.js";
 
 // Insert a new wallet transaction (inherits from Movement)
@@ -32,12 +31,12 @@ const getUserTransactions = async (user) => {
     return WalletTransaction.find(condition).populate([{path:"client", select:"shortId fullname"}, {path:"admin", select:"shortId entity_name"}]).exec()
 }
 
-const performTransaction = async (username, type, transaction_amount, wallet_password) => {
+const performTransaction = async (id, type, transaction_amount, wallet_password) => {
     let transactionInfo = {}
 
     // obtain client and admin information
     const client = await getUserById(id);
-    if(!client) throw new Error(`Client ${username} not found`)
+    if(!client) throw new Error(`Client ${id} not found`)
     const admin = await getUserById(client.admin)
     transactionInfo.client = client
     transactionInfo.admin = client.admin
@@ -84,9 +83,10 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
         }
     }
 
+
     const originInfo = origin_wallet ? `\n - Billetera origen: ${origin_wallet._id} (${origin_wallet.type})` : ""
     const destInfo = dest_wallet ? `\n - Billetera destino: ${dest_wallet._id} (${dest_wallet.type})` : ""
-    const emailDesc = `Se ha realizado una solicitud de ${transactionType}\n - Cliente: ${username}\n - Monto: ${transaction_amount}${originInfo}${destInfo}`
+    const emailDesc = `Se ha realizado una solicitud de ${transactionType}\n - Cliente: ${client.username}\n - Monto: ${transaction_amount}${originInfo}${destInfo}`
 
     if(type != 'usd-transfer' && type != 'inv-transfer') {
         sendEmail(client.email, `Solicitud de ${transactionType} realizada`, emailDesc)
