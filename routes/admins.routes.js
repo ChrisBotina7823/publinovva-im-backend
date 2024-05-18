@@ -3,7 +3,7 @@ import { encryptPassword } from '../helpers/encryption.js';
 import { deleteAdmin, insertAdmin, updateAdmin, getAdminByUsername, getAllAdmins, getAdminClients } from '../controller/admin-controller.js';
 import { errorHandler, isAdminLogged, isSuperUserLogged } from '../middlewares/login-md.js';
 import upload from '../helpers/multer-config.js';
-import { getUserByUsername, updateFileAttribute } from '../controller/user-controller.js';
+import { getUserById, updateFileAttribute } from '../controller/user-controller.js';
 import { config } from 'dotenv';
 import { getAllClients } from '../controller/client-controller.js';
 config()
@@ -28,10 +28,10 @@ router.get('/clients', isAdminLogged, async (req, res) => {
     }
 })  
 
-router.get('/:username', async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
     try {
-        const { username } = req.params;
-        const admin = await getAdminByUsername(username);
+        const { id } = req.params;
+        const admin = await getAdminById(id);
         res.status(200).json(admin);
     } catch (err) {
         errorHandler(res, err)
@@ -52,10 +52,10 @@ router.post('/', isSuperUserLogged, async (req, res) => {
     }
 });
 
-router.post('/ethereum-qr/:username', upload.single('ethereum_qr'), async (req, res) => {
+router.post('/ethereum-qr/:id', upload.single('ethereum_qr'), async (req, res) => {
     try {
-        const { username } = req.params;
-        const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'ethereum_qr');
+        const { id } = req.params;
+        const updatedAdmin = await updateFileAttribute(id, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'ethereum_qr');
         console.log(updatedAdmin)
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
@@ -65,10 +65,10 @@ router.post('/ethereum-qr/:username', upload.single('ethereum_qr'), async (req, 
     }    
 })
 
-router.post('/btc-qr/:username', upload.single('btc_qr'), async (req, res) => {
+router.post('/btc-qr/:id', upload.single('btc_qr'), async (req, res) => {
     try {
-        const { username } = req.params;
-        const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'btc_qr');
+        const { id } = req.params;
+        const updatedAdmin = await updateFileAttribute(id, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'btc_qr');
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
@@ -77,16 +77,16 @@ router.post('/btc-qr/:username', upload.single('btc_qr'), async (req, res) => {
     }    
 })
 
-router.put('/:username', isAdminLogged, async (req, res, next) => {
+router.put('/:id', isAdminLogged, async (req, res, next) => {
     try {
-        const { username } = req.params
+        const { id } = req.params
         let adminInfo = req.body
-        const prevUser = await getUserByUsername(username)
+        const prevUser = await getUserById(id)
         if(adminInfo.password) {
             adminInfo.password = await encryptPassword(adminInfo.password)
             adminInfo.passwordVersion = prevUser.passwordVersion+1
         } 
-        const updatedAdmin = await updateAdmin(username, adminInfo);
+        const updatedAdmin = await updateAdmin(id, adminInfo);
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
@@ -95,25 +95,25 @@ router.put('/:username', isAdminLogged, async (req, res, next) => {
     }
 });
 
-router.put('/account-state/:username', async (req, res) => {
+router.put('/account-state/:id', async (req, res) => {
     try {
         const { account_state } = req.body
-        const { username } = req.params
-        updateAdmin(username, {account_state})
+        const { id } = req.params
+        updateAdmin(id, {account_state})
         req.io.emit("adminsUpdate")
-        res.status(200).json({message: `${username} Admin status changed to ${account_state}`})
+        res.status(200).json({message: `${id} Admin status changed to ${account_state}`})
     } catch(err) {
         errorHandler(res, err)
     }
 })
 
 // Eliminar un administrador
-router.delete('/:username', isAdminLogged, async (req, res, next) => {
+router.delete('/:id', isAdminLogged, async (req, res, next) => {
     try {
-        const { username } = req.params;
-        await deleteAdmin(username);
+        const { id } = req.params;
+        await deleteAdmin(id);
         req.io.emit("adminsUpdate")
-        res.status(200).json({ message: `Deleted user ${username}` });
+        res.status(200).json({ message: `Deleted user ${id}` });
     } catch (err) {
         errorHandler(res, err)
     }

@@ -1,7 +1,6 @@
 import { sendEmail } from "../helpers/email-manager.js";
 import { calculateDayDiff, checkObj } from "../helpers/object-depuration.js";
 import { Investment } from "../model/models.js";
-import { getClientByUsername } from "./client-controller.js";
 import { getPackageById } from "./package-controller.js";
 import { getUserById } from "./user-controller.js";
 import { getWalletById, updateWallet, updateWalletById } from "./wallet-controller.js";
@@ -59,7 +58,7 @@ const getUserInvestments = async (user) => {
 const beginInvestment = async (username, end_date, package_id, inv_amount ) => {
     let investmentInfo = {}
 
-    const client = await getClientByUsername(username)
+    const client = await getUserById(id)
     investmentInfo.client = client
     checkObj(client, "client")
     const wallet = await getWalletById(client.i_wallet)

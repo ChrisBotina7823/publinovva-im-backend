@@ -1,7 +1,6 @@
 import { sendEmail } from "../helpers/email-manager.js";
 import { SupportTicket } from "../model/models.js";
-import { getClientByUsername } from "./client-controller.js";
-import { getUserById, getUserByUsername } from "./user-controller.js";
+import { getUserById } from "./user-controller.js";
 
 // Insert a new support ticket (inherits from Movement)
 const insertSupportTicket = async (supportTicketJson) => {
@@ -24,11 +23,11 @@ const getSupportTicketById = async (supportTicketId) => {
     return await SupportTicket.findById(supportTicketId);
 }
 
-const makeSupportTicket = async (username, description, category) => {
+const makeSupportTicket = async (id, description, category) => {
     let ticketInfo = {}
     // get client and admin information
-    const client = await getClientByUsername(username)
-    if(!client) throw new Error(`Client ${username} not found`)
+    const client = await getUserById(id)
+    if(!client) throw new Error(`Client ${id} not found`)
     const admin = await getUserById(client.admin)
     ticketInfo.client = client
     ticketInfo.admin = admin
@@ -39,7 +38,7 @@ const makeSupportTicket = async (username, description, category) => {
     
     const ticket = await insertSupportTicket(ticketInfo)
     sendEmail(client.email, `Ticket de soporte. Solicitud ${ticket._id}`, `¡Hola! Con este ticket podrás seguir tu solicitud de servicio al cliente. Se te enviará un correo en cuanto tu administrador responda a la solicitud`)
-    sendEmail(admin.email, `Servicio al cliente ${ticket.category}.`, `El cliente identificado con usuario ${client.username} ha realizado una solicitud de servicio al cliente a la categoría ${ticket.category}. A continuación el mensaje:\n${ticket.description}`)
+    sendEmail(admin.email, `Servicio al cliente ${ticket.category}.`, `El cliente identificado con usuario ${client.id} ha realizado una solicitud de servicio al cliente a la categoría ${ticket.category}. A continuación el mensaje:\n${ticket.description}`)
 
     return ticket
 }

@@ -1,8 +1,6 @@
 import express from "express";
 import { beginInvestment, getAllInvestments, getClientRevenueTable, getInvestmentById, getUserInvestments, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
 import { errorHandler, isAdminLogged } from "../middlewares/login-md.js";
-import { getClientByUsername } from "../controller/client-controller.js";
-import { getUserByUsername } from "../controller/user-controller.js";
 
 const router = express.Router()
 
@@ -15,10 +13,10 @@ router.get('/', isAdminLogged, async (req, res) => {
     }
 })
 
-router.get('/user/:username', async (req, res) => {
+router.get('/user/:id', async (req, res) => {
     try {
-        const { username } = req.params
-        const user = await getUserByUsername(username)
+        const { id } = req.params
+        const user = await getUserById(id)
         const investments = await getUserInvestments(user)
         res.status(200).json(investments)
     } catch(err) {
@@ -36,10 +34,10 @@ router.get('/:id', isAdminLogged, async (req, res) => {
     }
 })
 
-router.get('/revenues/:username', async (req, res) => {
+router.get('/revenues/:id', async (req, res) => {
     try {
-        const { username } = req.params
-        const client = await getClientByUsername(username)
+        const { id } = req.params
+        const client = await getUserById(id)
         const revenues = await getClientRevenueTable(client._id)
         res.status(200).json(revenues)
     } catch(err) {
@@ -47,11 +45,11 @@ router.get('/revenues/:username', async (req, res) => {
     }
 })
 
-router.post('/:username', async (req, res) => {
+router.post('/:id', async (req, res) => {
     try{ 
-        const { username } = req.params
+        const { id } = req.params
         const { end_date, package_id, inv_amount } = req.body
-        const investment = await beginInvestment(username, end_date, package_id, inv_amount)
+        const investment = await beginInvestment(id, end_date, package_id, inv_amount)
         req.io.emit("investmentsUpdate")
         res.status(200).json(investment)
     } catch(err) {

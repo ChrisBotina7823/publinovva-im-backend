@@ -1,5 +1,6 @@
 import { Investment, Wallet } from "../model/models.js";
-import { getClientByUsername, updateClient } from "./client-controller.js";
+import { updateClient } from "./client-controller.js";
+import { getUserById } from "./user-controller.js";
 
 // Insert a new wallet
 const insertWallet = async (walletJson) => {
@@ -9,7 +10,7 @@ const insertWallet = async (walletJson) => {
 
 // Update wallet by ID
 const updateWallet = async (username, type, updatedData) => {
-    const user = await getClientByUsername(username)
+    const user = await getUserById(id)
     const wallet_id = type == 'usd' ? user.usd_wallet : user.i_wallet
     return await Wallet.findByIdAndUpdate(wallet_id, updatedData);
 }

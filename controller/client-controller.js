@@ -44,11 +44,16 @@ const getAllClients = async () => {
     return clients;
 }
 
+const getClientByKey = async (username, admin_id) => {
+    return await Client.findOne({ username, admin: admin_id })
+}
+
 export {
     insertClient,
     updateClient,
     deleteClient,
     getClientByUsername,
     getClientMovements,
-    getAllClients
+    getAllClients,
+    getClientByKey
 }

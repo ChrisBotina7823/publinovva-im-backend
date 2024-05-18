@@ -1,7 +1,7 @@
 import express from 'express';
 import { loginUser } from '../auth/jwt-auth.js';
 import { getSuperUserByUsername, getUserByUsername, getUserByRecoveryToken, updateUser } from '../controller/user-controller.js';
-import { getClientByUsername } from '../controller/client-controller.js';
+import { getClientByKey } from '../controller/client-controller.js';
 import { getAdminByUsername } from '../controller/admin-controller.js';
 import { encryptPassword, generateToken } from '../helpers/encryption.js';
 import { sendEmail } from '../helpers/email-manager.js';
@@ -19,7 +19,7 @@ router.post('/superuser', async (req, res) => {
 });
 
 router.post('/client', async (req, res) => {
-    await loginUser(req, res, getClientByUsername);
+    await loginUser(req, res, getClientByKey);
 });
 
 router.post('/admin', async (req, res) => {

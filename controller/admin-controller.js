@@ -24,6 +24,10 @@ const getAdminByUsername = async (username) => {
     return await Admin.findOne({ username });
 }
 
+const getAdminById = async (id) => {
+    return await Admin.findById(id)
+}
+
 const getAdminClients = async (id) => {
     const clients = await Client.find({ admin: await Admin.findById(id) })
       .populate([
@@ -51,5 +55,6 @@ export {
     getAdminByUsername,
     getAdminClients,
     getAdminPackages,
-    getAllAdmins
+    getAllAdmins,
+    getAdminById
 }

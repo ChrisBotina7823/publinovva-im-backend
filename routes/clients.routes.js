@@ -1,10 +1,10 @@
 import express from 'express'
 import { encryptPassword } from '../helpers/encryption.js'
-import { deleteClient, insertClient, updateClient, getAllClients, getClientByUsername } from '../controller/client-controller.js'
+import { deleteClient, insertClient, updateClient, getAllClients } from '../controller/client-controller.js'
 import { errorHandler, isAdminLogged, isUserLogged } from '../middlewares/login-md.js'
 import { assignWalletToClient, updateWallet, updateWalletById } from '../controller/wallet-controller.js'
-import { getAdminByUsername } from '../controller/admin-controller.js'
-import { getUserByUsername } from '../controller/user-controller.js'
+import { getAdminById } from '../controller/admin-controller.js'
+import { getUserById } from '../controller/user-controller.js'
 
 const router = express.Router()
 
@@ -30,7 +30,7 @@ router.post('/', isAdminLogged, async (req, res) => {
             country,
             phone,
         }
-        const admin = await getAdminByUsername(req.user.username)
+        const admin = await getAdminById(req.user._id)
         newClient.admin = admin
 
         const usd_wallet = {
@@ -53,26 +53,26 @@ router.post('/', isAdminLogged, async (req, res) => {
     }
 })
 
-router.get('/:username', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
-        const { username } = req.params
-        const customer = await getClientByUsername  (username)
+        const { id } = req.params
+        const customer = await getUserById(id)
         res.status(200).json(customer)
     } catch(err) {
         errorHandler(res, err)
     }
 })
 
-router.put('/:username', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
-        const { username } = req.params
+        const { id } = req.params
         const clientInfo = req.body
-        const prevUser = await getUserByUsername(username)
+        const prevUser = await getUserById(id)
         if(clientInfo.password) {
             clientInfo.password = await encryptPassword(clientInfo.password) 
             clientInfo.passwordVersion = (prevUser.passwordVersion || 0) + 1;
         }
-        const updatedClient = await updateClient(username, clientInfo)
+        const updatedClient = await updateClient(id, clientInfo)
 
         // Wallet Information
         const { usd_balance = undefined, usd_address = undefined } = req.body
@@ -90,12 +90,12 @@ router.put('/:username', async (req, res) => {
     }
 })
 
-router.delete('/:username', isAdminLogged, async (req, res) => {
+router.delete('/:id', isAdminLogged, async (req, res) => {
     try {
-        const { username } = req.params
-        await deleteClient(username)
+        const { id } = req.params
+        await deleteClient(id)
         req.io.emit("clientsUpdate")
-        res.status(200).json(`Deleted user ${username}`)
+        res.status(200).json(`Deleted user ${id}`)
     } catch(err) {
         errorHandler(res, err)
     }

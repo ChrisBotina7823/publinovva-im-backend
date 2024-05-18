@@ -1,6 +1,5 @@
 import { errorHandler } from "../middlewares/login-md.js";
 import { Wallet, WalletTransaction } from "../model/models.js";
-import { getClientByUsername } from "./client-controller.js";
 import { getWalletById, updateWalletById } from "./wallet-controller.js";
 import { checkPassword } from "../helpers/encryption.js"
 import { sendEmail } from "../helpers/email-manager.js";
@@ -37,7 +36,7 @@ const performTransaction = async (username, type, transaction_amount, wallet_pas
     let transactionInfo = {}
 
     // obtain client and admin information
-    const client = await getClientByUsername(username);
+    const client = await getUserById(id);
     if(!client) throw new Error(`Client ${username} not found`)
     const admin = await getUserById(client.admin)
     transactionInfo.client = client
