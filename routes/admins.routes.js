@@ -52,10 +52,22 @@ router.post('/', isSuperUserLogged, async (req, res) => {
     }
 });
 
-router.post('/deposit-qr/:username', upload.single('deposit_qr'), async (req, res) => {
+router.post('/ethereum-qr/:username', upload.single('ethereum_qr'), async (req, res) => {
     try {
         const { username } = req.params;
-        const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_DEPOSIT_QR_FOLDER, req.file, 'deposit_qr');
+        const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_DEPOSIT_QR_FOLDER, req.file, 'ethereum_qr');
+        req.io.emit("adminsUpdate")
+        req.io.emit("usersUpdate")
+        res.status(200).json(updatedAdmin);
+    } catch (err) {
+        errorHandler(res, err);
+    }    
+})
+
+router.post('/btc-qr/:username', upload.single('btc_qr'), async (req, res) => {
+    try {
+        const { username } = req.params;
+        const updatedAdmin = await updateFileAttribute(username, process.env.DRIVE_DEPOSIT_QR_FOLDER, req.file, 'btc_qr');
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
