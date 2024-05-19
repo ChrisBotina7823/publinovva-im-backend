@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { config } from 'dotenv'
-import { invalidPassword, userNotFound } from '../helpers/exceptions.js'
+import { invalidPassword, userNotFound, suspendedUser } from '../helpers/exceptions.js'
 import { errorHandler } from '../middlewares/login-md.js'
 import { checkPassword } from '../helpers/encryption.js'
 config()
@@ -16,7 +16,8 @@ const loginUser = async (req, res, getUser) => {
         const match = await checkPassword(info.password, user.password)
 
         if (!match) invalidPassword(info.username)
-
+        if (user.suspended) suspendedUser(info.username)
+        
         const version = user.passwordVersion || 0;
         const token = jwt.sign({ ...user.toObject(), version }, process.env.USER_SECRET, { expiresIn: '24h' })
 
