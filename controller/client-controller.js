@@ -1,3 +1,4 @@
+import e from 'express';
 import { sendEmail } from '../helpers/email-manager.js';
 import { encryptPassword, generateToken } from '../helpers/encryption.js';
 import { Client, Movement, User }  from '../model/models.js';
@@ -35,13 +36,17 @@ const insertClient = async (req, suspended=false) => {
         const token = generateToken()
         newClient.recovery_token = token
         const recovery_link = `${req.protocol}://${req.get('host')}/auth/activate-account/${token}`
-        sendEmail(
+        const email_sent = sendEmail(
             newClient.email,
             "Password Recovery",
             `Para activar tu cuenta ingresa al siguiente enlace:\n${recovery_link}`
         )
+        if(!email_sent) {
+            throw error("La dirección de correo electrónico no es válida")
+        }
     }
     const client = new Client(newClient);
+    client.save();
     await assignWalletToClient(client, admin, usd_wallet, i_wallet)
     return client
 }
