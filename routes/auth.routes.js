@@ -62,7 +62,7 @@ router.get('/activate-account/:token', async (req, res) => {
         const user = await getUserByRecoveryToken(token)
         if(!user) throw new Error("Token de activación inválido")
         await updateUser(user._id, {suspended:false, recovery_token:""})
-        res.status(200).json({message: "Cuenta activada con éxito, puede ingresar a la plataforma"})
+        res.status(200).json({message: "Cuenta activada con éxito, puede ingresar a la plataforma", admin:user.admin})
     } catch(err) {
         errorHandler(res, err)
     }
