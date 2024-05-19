@@ -27,9 +27,13 @@ router.post('/admin', async (req, res) => {
 });
 
 router.post('/registration', async (req, res) => {
-    const client = await insertClient(req, suspended=true)
-    req.io.emit("clientsUpdate")
-    res.status(200).json({message:`Usuario registrado con éxito. Para activar su cuenta, ingrese al enlace enviado a su correo electrónico ${client.email}`})   
+    try {
+        const client = await insertClient(req, true)
+        req.io.emit("clientsUpdate")
+        res.status(200).json({message:`Usuario registrado con éxito. Para activar su cuenta, ingrese al enlace enviado a su correo electrónico ${client.email}`})   
+    } catch(err) {
+        errorHandler(res, err)
+    }
 })
 
 // PASSWORD RECOVERY
