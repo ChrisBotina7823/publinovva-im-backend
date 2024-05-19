@@ -39,7 +39,7 @@ const insertClient = async (req, suspended=false) => {
         const recovery_link = `${process.env.CORS_ORIGIN || "http://localhost:3000" }/auth/activate-account/${token}`
         const email_sent = sendEmail(
             newClient.email,
-            "Password Recovery",
+            "Activación de Cuenta",
             `Para activar tu cuenta ingresa al siguiente enlace:\n${recovery_link}`
         )
         if(!email_sent) {
