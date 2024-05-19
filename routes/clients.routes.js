@@ -19,33 +19,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', isAdminLogged, async (req, res) => {
     try {
-        const { username, password, email, profile_picture = undefined, fullname, country, phone } = req.body
-        const { usd_name, usd_password, i_name, i_password } = req.body
-        let newClient = {
-            username,
-            password: await encryptPassword(password),
-            email,
-            profile_picture,
-            fullname,
-            country,
-            phone,
-        }
-        const admin = await getAdminById(req.user._id)
-        newClient.admin = admin
-
-        const usd_wallet = {
-            type: "USD",
-            name: usd_name || "USD Wallet",
-            password: await encryptPassword(usd_password)            
-        } 
-        const i_wallet = {
-            type: "INV",
-            name: i_name || "Investment Wallet",
-            password: await encryptPassword(i_password)
-        }
-        
-        const client = await insertClient(newClient)
-        await assignWalletToClient(client, admin, usd_wallet, i_wallet)
+        req.body.admin_id = req.user._id
+        const client = await insertClient(req)
         req.io.emit("clientsUpdate")
         res.status(200).json(client) 
     } catch(err) {

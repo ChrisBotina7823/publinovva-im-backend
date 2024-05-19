@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema({
     profile_picture: { type: String, default: "" },
     recovery_token: { type: String, default: "" },
     passwordVersion: {type: Number, default: 0},
+    suspended: { type: Boolean, default: false },
 });
 
 addShortIdToSchema(userSchema);

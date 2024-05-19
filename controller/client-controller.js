@@ -1,9 +1,49 @@
+import { sendEmail } from '../helpers/email-manager.js';
+import { encryptPassword, generateToken } from '../helpers/encryption.js';
 import { Client, Movement, User }  from '../model/models.js';
+import { getAdminById } from './admin-controller.js';
+import { assignWalletToClient } from './wallet-controller.js';
 
 // Insert a new client (inherits from User)
-const insertClient = async (clientJson) => {
-    const client = new Client(clientJson);
-    return await client.save();
+const insertClient = async (req, suspended=false) => {
+    const { username, password, email, profile_picture = undefined, fullname, country, phone } = req.body
+    const { usd_name, usd_password, i_name, i_password } = req.body
+    let newClient = {
+        username,
+        password: await encryptPassword(password),
+        email,
+        profile_picture,
+        fullname,
+        country,
+        phone,
+        suspended
+    }
+    const admin_id = req.body.admin_id
+    const admin = await getAdminById(admin_id)
+    newClient.admin = admin
+    const usd_wallet = {
+        type: "USD",
+        name: usd_name || "USD Wallet",
+        password: await encryptPassword(usd_password)            
+    } 
+    const i_wallet = {
+        type: "INV",
+        name: i_name || "Investment Wallet",
+        password: await encryptPassword(i_password)
+    }
+    if(suspended) {
+        const token = generateToken()
+        newClient.recovery_token = token
+        const recovery_link = `${req.protocol}://${req.get('host')}/auth/activate-account/${token}`
+        sendEmail(
+            newClient.email,
+            "Password Recovery",
+            `Para activar tu cuenta ingresa al siguiente enlace:\n${recovery_link}`
+        )
+    }
+    const client = new Client(newClient);
+    await assignWalletToClient(client, admin, usd_wallet, i_wallet)
+    return client
 }
 
 // Update client by username

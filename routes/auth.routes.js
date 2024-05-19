@@ -26,6 +26,13 @@ router.post('/admin', async (req, res) => {
     await loginUser(req, res, getAdminByUsername);
 });
 
+router.post('/registration/:admin_id', async (req, res) => {
+    req.body.admin_id = req.params.admin_id
+    const client = await insertClient(req, suspended=true)
+    req.io.emit("clientsUpdate")
+    res.status(200).json({message:`Usuario registrado con éxito. Para activar su cuenta, ingrese al enlace enviado a su correo electrónico ${client.email}`})   
+})
+
 // PASSWORD RECOVERY
 
 router.post('/forgot-password/', async (req, res) => {
@@ -45,6 +52,18 @@ router.post('/forgot-password/', async (req, res) => {
             `Para recuperar tu contraseña ingresa al siguiente enlace:\n${recovery_link}`
         )
         res.status(200).json({message:"Email sent"})    
+    } catch(err) {
+        errorHandler(res, err)
+    }
+})
+
+router.get('/activate-account/:token', async (req, res) => {
+    try {
+        const { token } = req.params
+        const user = await getUserByRecoveryToken(token)
+        if(!user) throw new Error("Token de activación inválido")
+        await updateUser(user._id, {suspended:false, recovery_token:""})
+        res.status(200).json({message: "Cuenta activada con éxito, puede ingresar a la plataforma"})
     } catch(err) {
         errorHandler(res, err)
     }
