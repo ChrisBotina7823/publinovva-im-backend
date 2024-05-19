@@ -11,11 +11,11 @@ const insertUser = async (userJson) => {
 }
 
 const updateUser = async (id, updatedData) => {
-    return await User.findByIdAndUpdate({ id }, updatedData);
+    return await User.findByIdAndUpdate(id , updatedData);
 }
 
 const deleteUser = async (id) => {
-    return await User.findByIdAndDelete({ id });
+    return await User.findByIdAndDelete(id);
 }
 
 const getUserByUsername = async (username) => {

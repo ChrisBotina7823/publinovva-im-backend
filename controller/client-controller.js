@@ -1,9 +1,10 @@
-import e from 'express';
 import { sendEmail } from '../helpers/email-manager.js';
 import { encryptPassword, generateToken } from '../helpers/encryption.js';
 import { Client, Movement, User }  from '../model/models.js';
 import { getAdminById } from './admin-controller.js';
 import { assignWalletToClient } from './wallet-controller.js';
+import { config } from 'dotenv'
+config()
 
 // Insert a new client (inherits from User)
 const insertClient = async (req, suspended=false) => {
@@ -35,7 +36,7 @@ const insertClient = async (req, suspended=false) => {
     if(suspended) {
         const token = generateToken()
         newClient.recovery_token = token
-        const recovery_link = `${req.protocol}://${req.get('host')}/auth/activate-account/${token}`
+        const recovery_link = `${process.env.CORS_ORIGIN || "http://localhost:3000" }/auth/activate-account/${token}`
         const email_sent = sendEmail(
             newClient.email,
             "Password Recovery",
