@@ -3,6 +3,7 @@ import { config } from 'dotenv'
 import { invalidPassword, userNotFound, suspendedUser } from '../helpers/exceptions.js'
 import { errorHandler } from '../middlewares/login-md.js'
 import { checkPassword } from '../helpers/encryption.js'
+import { sendEmail } from '../helpers/email-manager.js'
 config()
 
 const loginUser = async (req, res, getUser) => {
@@ -35,6 +36,7 @@ const loginUser = async (req, res, getUser) => {
             const login_code = Math.random().toString(36).substring(5).toUpperCase();
             user.login_code = login_code;
             user.save();
+            sendEmail(user.email, "Código de inicio de sesión", `Tu código de inicio de sesión es: ${login_code}`);
             res.json({"login_code": login_code});
         } 
     } catch (err) {
