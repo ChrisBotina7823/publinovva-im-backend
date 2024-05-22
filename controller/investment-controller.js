@@ -45,7 +45,7 @@ const getAllInvestments = async () => {
 
 const getUserInvestments = async (user) => {
     const condition = user.__t == "Client"  ? {"client":user._id} : {}
-    let inv =  await Investment.find(condition).populate([{path:"client", select:"shortId fullname admin"}, {path:"package", select:"shortId name"}]).exec()
+    let inv =  await Investment.find(condition).populate([{path:"client", select:"shortId fullname admin"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec()
     inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
 
     if(user.__t == "Admin") {
