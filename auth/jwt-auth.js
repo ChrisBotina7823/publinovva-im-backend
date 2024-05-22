@@ -36,7 +36,7 @@ const loginUser = async (req, res, getUser) => {
             const login_code = Math.random().toString(36).substring(5).toUpperCase();
             user.login_code = login_code;
             user.save();
-            sendEmail(user.email, "Código de inicio de sesión", `Tu código de inicio de sesión es: ${login_code}`);
+            // sendEmail(user.email, "Código de inicio de sesión", `Tu código de inicio de sesión es: ${login_code}`);
             res.json({"login_code": login_code});
         } 
     } catch (err) {
