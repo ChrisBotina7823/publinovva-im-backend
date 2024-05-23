@@ -46,7 +46,7 @@ const getAllInvestments = async () => {
 const getUserInvestments = async (user) => {
     const condition = user.__t == "Client"  ? {"client":user._id} : {}
     let inv =  await Investment.find(condition).populate([{path:"client", select:"shortId fullname admin"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec()
-    inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
+    // inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
 
     if(user.__t == "Admin") {
         inv = inv.filter( i => i.client?.admin == user._id.toString() )
@@ -186,7 +186,7 @@ const generateInvestmentReport = async (id) => {
         const days_diff = end_days - start_days
         const revenue_days = Math.floor(days_diff / freq)
         total_invested += investment.inv_amount
-        total_revenue += revenue_days * (investment.inv_amount * (freq / 100))
+        total_revenue += revenue_days * (investment.inv_amount * (investment.package.revenue_percentage / 100))
     }
     let daily_revenue = Array(7).fill(0);
     let day_idx = Array(7).fill(0);
@@ -204,7 +204,7 @@ const generateInvestmentReport = async (id) => {
             const start_days = toDays(start_date)
             const days_diff = end_days - start_days
             if( days_diff && days_diff % freq == 0 ) {
-                const revenue = investment.inv_amount * (freq / 100);
+                const revenue = investment.inv_amount * (investment.package.revenue_percentage / 100);
                 daily_revenue[6 - i] += revenue;
             }        
         }
