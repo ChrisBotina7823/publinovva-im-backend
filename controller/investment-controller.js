@@ -163,6 +163,64 @@ const calculateRevenueTable = (investment) => {
     return revenueTable;
 };
 
+const isValid = investment => {
+    return investment.package && investment.state != "pendiente" && investment.state != "rechazado"
+}
+
+const toDays = date => {
+    return Math.floor(date / (1000 * 60 * 60 * 24));
+}
+
+const generateInvestmentReport = async (id) => {
+    const client = await getUserById(id)
+    const investments = await getUserInvestments(client)
+    let total_invested = 0, total_revenue = 0;
+    const today = new Date();
+    for(const investment of investments) {
+        if(!isValid(investment)) continue; // Skip if the investment is invalid
+        const start_date = new Date(investment.actual_start_date || investment.start_date);
+        const end_date = Math.max( new Date(investment.end_date), today );
+        const freq = investment.package.revenue_freq
+        const start_days = toDays(start_date)
+        const end_days = toDays(end_date)
+        const days_diff = end_days - start_days
+        const revenue_days = Math.floor(days_diff / freq)
+        total_invested += investment.inv_amount
+        total_revenue += revenue_days * (investment.inv_amount * (freq / 100))
+    }
+    let daily_revenue = Array(7).fill(0);
+    let day_idx = Array(7).fill(0);
+    for(let i = 6; i >= 0; i--) { // Loop over the last 7 days
+        const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        day_idx[6 - i] = day.getDay();
+
+        for(const investment of investments) {
+            if(!isValid(investment)) continue; // Skip if the investment is invalid
+            const start_date = new Date(investment.actual_start_date || investment.start_date);
+            if(start_date > day) continue; // Skip if the investment hasn't started yet
+            const freq = investment.package.revenue_freq
+
+            const end_days = toDays(day)
+            const start_days = toDays(start_date)
+            const days_diff = end_days - start_days
+            if( days_diff && days_diff % freq == 0 ) {
+                const revenue = investment.inv_amount * (freq / 100);
+                daily_revenue[6 - i] += revenue;
+            }        
+        }
+    }
+
+    const chart = {
+        labels: day_idx.map( i => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i] ),
+        datasets: [{ label: "Revenue", data: daily_revenue }],
+    }
+    
+    return {
+        "total_revenue": total_revenue,
+        "total_invested": total_invested,
+        "chart": chart,
+    }
+}
 
 export {
     insertInvestment,
@@ -173,5 +231,6 @@ export {
     beginInvestment,
     updateInvestmentState,
     getClientRevenueTable,
-    getUserInvestments
+    getUserInvestments,
+    generateInvestmentReport
 }
