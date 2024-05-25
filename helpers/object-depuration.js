@@ -25,7 +25,9 @@ const checkObj = (obj, prototype) => {
 
 const calculateDayDiff = (start_date, end_date) => {
   const msDiff = end_date - start_date  
-  const dayDiff = Math.floor(msDiff / (1000 * 60 * 60 * 24));
+  console.log(msDiff)
+  const dayDiff = msDiff / (1000 * 60 * 60 * 24);
+  console.log(dayDiff)
   return dayDiff
 }
 

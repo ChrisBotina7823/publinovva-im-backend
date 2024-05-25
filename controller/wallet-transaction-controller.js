@@ -67,6 +67,9 @@ const performTransaction = async (id, type, transaction_amount, wallet_password)
         default:
             throw new Error(`Enter a valid wallet transaction type`)
     }
+    console.log(transactionType)
+    console.log(transactionInfo.dest_wallet)
+    console.log(transactionInfo.origin_wallet)
     transactionInfo.transaction_type = type
 
     // check credentials and balance

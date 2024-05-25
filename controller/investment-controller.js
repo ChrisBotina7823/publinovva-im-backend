@@ -1,3 +1,4 @@
+import { differenceInDays } from "date-fns";
 import { sendEmail } from "../helpers/email-manager.js";
 import { calculateDayDiff, checkObj } from "../helpers/object-depuration.js";
 import { Investment } from "../model/models.js";
@@ -74,7 +75,9 @@ const beginInvestment = async (id, end_date, package_id, inv_amount ) => {
     investmentInfo.inv_amount = inv_amount
 
     investmentInfo.end_date = new Date(end_date)
-    const dayDiff = calculateDayDiff( new Date(), investmentInfo.end_date )
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0);
+    const dayDiff = differenceInDays( investmentInfo.end_date, currentDate )
     if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package.name} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
 
     const investment = await insertInvestment(investmentInfo)
@@ -113,15 +116,28 @@ const updateInvestmentState = async (id, state) => {
 }
 
 const calculateRevenue = async (investment) => {
-    if(!investment.actual_start_date) return 0
-    const dayDiff = Math.min( 
-        calculateDayDiff( investment.actual_start_date, new Date() ),
-        calculateDayDiff( investment.actual_start_date, investment.end_date )
-    ) 
-    const inv_package = await getPackageById(investment.package)
-    if(!inv_package) return 0
-    const day_cnt = Math.floor(dayDiff / inv_package.revenue_freq)
-    return day_cnt*(inv_package.revenue_percentage/100)*investment.inv_amount
+
+    let total_revenue = 0;
+    const revenues = [];
+    const start_date = new Date(investment.actual_start_date || investment.start_date);
+    const curr_date = new Date();
+    curr_date.setUTCHours(0, 0, 0, 0);
+    const end_date = Math.min(new Date(investment.end_date), curr_date);
+    const freq = investment.package.revenue_freq
+    for(let day = new Date(start_date); day <= end_date; day.setDate(day.getDate() + 1)) {
+        const start_days = toDays(start_date)
+        const end_days = toDays(day)
+        const days_diff = end_days - start_days
+        if(days_diff && days_diff % freq == 0) {
+            const revenue = investment.inv_amount * (investment.package.revenue_percentage / 100);
+            total_revenue += revenue;
+            revenues.push({ date: new Date(day), revenue });
+        }
+    }
+    return {
+        "total_revenue": total_revenue,
+        "revenues": revenues,
+    }
 }
 
 const getClientRevenueTable = async (id) => {
@@ -147,6 +163,7 @@ const calculateRevenueTable = (investment) => {
     const revenue_amount = inv_amount * (revenue_percentage / 100);
 
     const todayDate = new Date()
+    todayDate.setUTCHours(0, 0, 0, 0);
 
     while (currentDate <= endDate && currentDate <= todayDate) {
         const days_diff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
@@ -176,14 +193,18 @@ const generateInvestmentReport = async (id) => {
     const investments = await getUserInvestments(client)
     let total_invested = 0, total_revenue = 0;
     const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
     for(const investment of investments) {
         if(!isValid(investment)) continue; // Skip if the investment is invalid
         const start_date = new Date(investment.actual_start_date || investment.start_date);
-        const end_date = Math.max( new Date(investment.end_date), today );
+        start_date.setUTCHours(0, 0, 0, 0);
+        const end_date =  Math.min( new Date(investment.end_date), today );
+
         const freq = investment.package.revenue_freq
-        const start_days = toDays(start_date)
-        const end_days = toDays(end_date)
-        const days_diff = end_days - start_days
+        console.log(new Date(end_date))
+        console.log(start_date)
+        const days_diff = differenceInDays(end_date, start_date)
+        console.log(days_diff)
         const revenue_days = Math.floor(days_diff / freq)
         total_invested += investment.inv_amount
         total_revenue += revenue_days * (investment.inv_amount * (investment.package.revenue_percentage / 100))
@@ -191,7 +212,7 @@ const generateInvestmentReport = async (id) => {
     let daily_revenue = Array(7).fill(0);
     let day_idx = Array(7).fill(0);
     for(let i = 6; i >= 0; i--) { // Loop over the last 7 days
-        const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i + 1);
         day_idx[6 - i] = day.getDay();
 
         for(const investment of investments) {
