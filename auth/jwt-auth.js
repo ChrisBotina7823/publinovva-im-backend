@@ -24,6 +24,18 @@ const loginUser = async (req, res, getUser) => {
 
         if (user.account_state && user.account_state == "suspendido") throw new Error(`La cuenta ${username} se encuentra suspendida, contáctate con el administrador.`)
         
+        const emailVerification = process.env.PRODUCTION || false
+
+        if(!emailVerification) {
+            req.headers.token = token;
+            res.json({
+                message: `Welcome ${username}`,
+                token: token,
+                user: user
+            });
+            return;
+        }
+
         if(req.body.login_code) {
             if(req.body.login_code != user.login_code) throw new Error("Código de inicio de sesión incorrecto");
             req.headers.token = token;
