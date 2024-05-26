@@ -35,6 +35,7 @@ const parseUsername = (username) => {
   return username.toLowerCase().replace(/\s/g, '');
 }
 
+
 export {
     filterObject,
     getIdFromUrl,

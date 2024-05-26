@@ -33,13 +33,12 @@ const deleteInvestment = async (investmentId) => {
 
 // Get investment by ID
 const getInvestmentById = async (investmentId) => {
-    const inv = await Investment.findById(investmentId);
-    inv.revenue = await calculateRevenue(inv)
+    const inv = await Investment.findById(investmentId).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec();
     return inv
 }
 
 const getAllInvestments = async () => {
-    const inv =  await Investment.find({}).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name"}]).exec()
+    const inv =  await Investment.find({}).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec()
     inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
     return inv
 }
@@ -122,21 +121,20 @@ const calculateRevenue = async (investment) => {
     const start_date = new Date(investment.actual_start_date || investment.start_date);
     const curr_date = new Date();
     curr_date.setUTCHours(0, 0, 0, 0);
+    start_date.setUTCHours(0, 0, 0, 0);
     const end_date = Math.min(new Date(investment.end_date), curr_date);
     const freq = investment.package.revenue_freq
     for(let day = new Date(start_date); day <= end_date; day.setDate(day.getDate() + 1)) {
-        const start_days = toDays(start_date)
-        const end_days = toDays(day)
-        const days_diff = end_days - start_days
+        const days_diff = differenceInDays(day, start_date)
         if(days_diff && days_diff % freq == 0) {
             const revenue = investment.inv_amount * (investment.package.revenue_percentage / 100);
             total_revenue += revenue;
-            revenues.push({ date: new Date(day), revenue });
+            revenues.push({ date: new Date(day), amount:revenue });
         }
     }
     return {
         "total_revenue": total_revenue,
-        "revenues": revenues,
+        "revenues": revenues.reverse(),
     }
 }
 
@@ -202,9 +200,7 @@ const generateInvestmentReport = async (id) => {
 
         const freq = investment.package.revenue_freq
         console.log(new Date(end_date))
-        console.log(start_date)
         const days_diff = differenceInDays(end_date, start_date)
-        console.log(days_diff)
         const revenue_days = Math.floor(days_diff / freq)
         total_invested += investment.inv_amount
         total_revenue += revenue_days * (investment.inv_amount * (investment.package.revenue_percentage / 100))
@@ -253,5 +249,6 @@ export {
     updateInvestmentState,
     getClientRevenueTable,
     getUserInvestments,
-    generateInvestmentReport
+    generateInvestmentReport,
+    calculateRevenue
 }
