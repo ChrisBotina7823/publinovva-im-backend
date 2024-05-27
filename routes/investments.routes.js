@@ -75,6 +75,7 @@ router.post('/change-state/:id', isAdminLogged, async (req, res) => {
         const { state } = req.body
         const updatedInvestment = await updateInvestmentState(id, state)
         req.io.emit("investmentsUpdate")
+        req.io.emit("clientsUpdate")
         res.status(200).json(updatedInvestment)
     } catch(err) {
         errorHandler(res, err)

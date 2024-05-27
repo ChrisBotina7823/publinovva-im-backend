@@ -1,6 +1,8 @@
+import { deleteFile } from '../helpers/drive-upload.js';
 import { sendEmail } from '../helpers/email-manager.js';
 import { encryptPassword, generateToken } from '../helpers/encryption.js';
-import { Client, Movement, User }  from '../model/models.js';
+import { getIdFromUrl } from '../helpers/object-depuration.js';
+import { Client, Investment, Movement, User, Wallet }  from '../model/models.js';
 import { getAdminById } from './admin-controller.js';
 import { assignWalletToClient } from './wallet-controller.js';
 import { config } from 'dotenv'
@@ -22,6 +24,13 @@ const insertClient = async (req, suspended=false) => {
     }
     const admin_id = req.body.admin_id
     const admin = await getAdminById(admin_id)
+    console.log(username, req.body.admin_id)
+    let clientFound = await Client.findOne({username, admin})
+    console.log(clientFound)
+    if(clientFound) throw new Error(`El nombre de usuario ${username} ya está en uso. Por favor, elige otro nombre de usuario`)
+    clientFound = await Client.findOne({email, admin})
+    console.log(clientFound)
+    if(clientFound) throw new Error(`El correo ${email} ya está en uso. Por favor, elige otro correo electrónico`)
     newClient.admin = admin
     const usd_wallet = {
         type: "USD",
@@ -59,6 +68,15 @@ const updateClient = async (id, updatedData) => {
 
 // Delete client by username
 const deleteClient = async (id) => {
+    const client = await Client.findById(id)
+    try {
+        if(client.profile_picture) await deleteFile(getIdFromUrl(client.profile_picture))
+    } catch(err) {
+        console.log(err);
+    }
+    await Investment.deleteMany({client: id})
+    await Movement.deleteMany({client: id})
+    await Wallet.deleteMany({client: id})
     return await Client.findByIdAndDelete(id);
 }
 
@@ -91,7 +109,7 @@ const getAllClients = async () => {
 }
 
 const getClientByKey = async (username, admin_id) => {
-    const user = await Client.findOne({ username, admin: admin_id })
+    const user = await Client.findOne({ $or: [{username}, {email:username}], admin: admin_id })
     if(user) {
         const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
         await User.populate(user, populateFields);

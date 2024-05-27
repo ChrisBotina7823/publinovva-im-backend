@@ -15,6 +15,7 @@ const statePhase = {
 
 // Insert a new investment
 const insertInvestment = async (investmentJson) => {
+    console.log(investmentJson.package)
     const investment = new Investment(investmentJson);
     return await investment.save();
 }
@@ -39,7 +40,8 @@ const getInvestmentById = async (investmentId) => {
 
 const getAllInvestments = async () => {
     const inv =  await Investment.find({}).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec()
-    inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
+    console.log(inv)
+    inv.forEach( async i => i.revenue = (await calculateRevenue(i)).total_revenue) 
     return inv
 }
 
@@ -47,6 +49,10 @@ const getUserInvestments = async (user) => {
     const condition = user.__t == "Client"  ? {"client":user._id} : {}
     let inv =  await Investment.find(condition).populate([{path:"client", select:"shortId fullname admin"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec()
     // inv.forEach( async i => i.revenue = await calculateRevenue(i)) 
+
+    for(let i of inv) {
+        i.revenue = (await calculateRevenue(i)).total_revenue
+    }
 
     if(user.__t == "Admin") {
         inv = inv.filter( i => i.client?.admin == user._id.toString() )
@@ -67,7 +73,7 @@ const beginInvestment = async (id, end_date, package_id, inv_amount ) => {
     checkObj(inv_package, "inv_package")
     const admin = await getUserById(client.admin)
     investmentInfo.package = inv_package
-
+    
     if(inv_amount > wallet.available_amount) throw new Error(`No hay suficiente dinero en la billetera ${wallet._id}`)
 
     if(inv_amount < inv_package.min_opening_amount) throw new Error(`El monto es menor al requerido por el paquete ${inv_package.name}. Monto Mínimo: $${inv_package.min_opening_amount} `)
@@ -79,6 +85,7 @@ const beginInvestment = async (id, end_date, package_id, inv_amount ) => {
     const dayDiff = differenceInDays( investmentInfo.end_date, currentDate )
     if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package.name} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
 
+    console.log(investmentInfo)
     const investment = await insertInvestment(investmentInfo)
     console.log(admin.email)
     sendEmail(client.email, "Solicitud de Inversión", "¡Hola! Tu solicitud de inversión se ha realizado correctamente. Se notificará al administrador para que responda a tu solicitud")
@@ -102,9 +109,12 @@ const updateInvestmentState = async (id, state) => {
             invInfo.actual_start_date = Date.now() 
             break
         case "finalizado":
-            updateWalletById(wallet._id, {available_amount: wallet.available_amount + investment.inv_amount + (await calculateRevenue(investment)) })
+            updateWalletById(wallet._id, {available_amount: wallet.available_amount + investment.inv_amount + (await calculateRevenue(investment)).total_revenue })
             break
         case "rechazado":
+            if(investment.state == "en curso") {
+                updateWalletById(wallet._id, {available_amount: wallet.available_amount + investment.inv_amount})
+            }
             break
         default:
             throw new Error(`Insert a valid state for investments`)
@@ -125,6 +135,7 @@ const calculateRevenue = async (investment) => {
     const end_date = Math.min(new Date(investment.end_date), curr_date);
     const freq = investment.package.revenue_freq
     for(let day = new Date(start_date); day <= end_date; day.setDate(day.getDate() + 1)) {
+        day.setUTCHours(0, 0, 0, 0)
         const days_diff = differenceInDays(day, start_date)
         if(days_diff && days_diff % freq == 0) {
             const revenue = investment.inv_amount * (investment.package.revenue_percentage / 100);
@@ -155,8 +166,10 @@ const calculateRevenueTable = (investment) => {
 
 
     const currentDate = new Date(actual_start_date);
+    currentDate.setUTCHours(0,0,0,0)
 
     const endDate = new Date(end_date)
+    endDate.setUTCHours(0,0,0,0)
 
     const revenue_amount = inv_amount * (revenue_percentage / 100);
 
@@ -215,6 +228,7 @@ const generateInvestmentReport = async (id) => {
             if(!isValid(investment)) continue; // Skip if the investment is invalid
             const start_date = new Date(investment.actual_start_date || investment.start_date);
             if(start_date > day) continue; // Skip if the investment hasn't started yet
+            if(investment.end_date < day) continue; // Skip if the investment has ended
             const freq = investment.package.revenue_freq
 
             const end_days = toDays(day)

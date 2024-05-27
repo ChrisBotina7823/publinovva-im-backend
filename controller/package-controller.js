@@ -1,8 +1,10 @@
-import { Package }  from '../model/models.js';
+import { Investment, Package }  from '../model/models.js';
+import { updateInvestmentState } from './investment-controller.js';
 
 // Insert a new package
 const insertPackage = async (packageJson) => {
     const newPackage = new Package(packageJson);
+    console.log(newPackage)
     return await newPackage.save();
 }
 

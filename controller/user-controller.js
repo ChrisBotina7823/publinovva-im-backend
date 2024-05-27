@@ -19,7 +19,7 @@ const deleteUser = async (id) => {
 }
 
 const getUserByUsername = async (username) => {
-    const user = await User.findOne({ username })
+    const user = await User.findOne({ $or: [{ username }, { email:username }] });
     if(user?.__t && user.__t == "Client") {
         const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
         await User.populate(user, populateFields);
@@ -32,7 +32,8 @@ const getAllUsers = async () => {
 }
 
 const getSuperUserByUsername = async (username) => {
-    return await User.findOne({username, __t: undefined})
+    console.log(await User.find({}))
+    return await User.findOne({ $or: [{ username }, { email:username }], __t: undefined });
 }
 
 const getUserById = async (id) => {
@@ -66,7 +67,6 @@ const updateFileAttribute = async (id, folderId, file, attribute) => {
                 console.log(`File deleted from drive for ${attribute}`);
             }
         )
-    console.log(previewLink)
     if(user.__t == "Admin") {
         return await updateAdmin(id, {[attribute]:previewLink})
     } else if(user.__t == "Client") {

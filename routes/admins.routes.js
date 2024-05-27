@@ -6,6 +6,7 @@ import upload from '../helpers/multer-config.js';
 import { getUserById, updateFileAttribute } from '../controller/user-controller.js';
 import { config } from 'dotenv';
 import { getAllClients } from '../controller/client-controller.js';
+import { Admin } from '../model/models.js';
 
 config()
 
@@ -45,6 +46,9 @@ router.post('/', isSuperUserLogged, async (req, res) => {
         let newAdmin = req.body
         newAdmin.password = await encryptPassword(req.body.password)
         const updatedAdmin = await insertAdmin(newAdmin);
+        Admin.collection.getIndexes({full: true}).then(indexes => {
+            console.log("Indexes:", indexes);
+        }).catch(console.error);
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);

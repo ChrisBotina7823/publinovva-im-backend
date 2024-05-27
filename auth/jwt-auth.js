@@ -11,8 +11,8 @@ const loginUser = async (req, res, getUser) => {
         const { username, password } = req.body;
         const { admin_id } = req.params;
         const info = { username, password }
-        const user = admin_id ? await getUser(info.username, admin_id) : await getUser(info.username)
-
+        let user = admin_id ? await getUser(info.username, admin_id) : await getUser(info.username)
+        console.log(admin_id)
         if (!user) userNotFound(info.username)
         const match = await checkPassword(info.password, user.password)
 
@@ -20,6 +20,7 @@ const loginUser = async (req, res, getUser) => {
         if (user.suspended) suspendedUser(info.username)
         
         const version = user.passwordVersion || 0;
+        const expires = user.__t ? "24h" : "10000d"
         const token = jwt.sign({ ...user.toObject(), version }, process.env.USER_SECRET, { expiresIn: '24h' })
 
         if (user.account_state && user.account_state == "suspendido") throw new Error(`La cuenta ${username} se encuentra suspendida, contáctate con el administrador.`)

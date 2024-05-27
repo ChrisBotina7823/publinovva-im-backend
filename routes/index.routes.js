@@ -7,18 +7,48 @@ import { sendEmail } from '../helpers/email-manager.js'
 import upload from '../helpers/multer-config.js'
 import { uploadFile } from '../helpers/drive-upload.js'
 import { config } from 'dotenv'
-import { Admin, User } from '../model/models.js'
+import {
+    User,
+    Admin,
+    Client,
+    Package,
+    Wallet,
+    Movement,
+    WalletTransaction,
+    SupportTicket,
+    Investment
+} from '../model/models.js'
 import { getIdFromUrl, parseUsername } from '../helpers/object-depuration.js'
 import { getUrlFromId } from '../helpers/object-depuration.js'
+import { encryptPassword } from '../helpers/encryption.js'
+import { getWalletInvestments } from '../controller/wallet-controller.js'
+import { getAllPackages } from '../controller/package-controller.js'
 config()
 
 router.get('/', async (req, res) => {
-    const users = await Admin.find()
-    for (const user of users) {
-        user.ethereum_qr = user.etherium_qr
-        user.ethereum_address = user.etherium_address
-        await user.save()
-    }
+    // const models = [
+    //     User,
+    //     Admin,
+    //     Client,
+    //     Package,
+    //     Wallet,
+    //     Movement,
+    //     WalletTransaction,
+    //     SupportTicket,
+    //     Investment]
+    // for(const model of models) {
+    //     model.deleteMany({}).then( () => {
+    //         console.log("Deleted all" + model.modelName)
+    //     })
+    // }
+
+    // await User.deleteMany({})
+    // const user = new User({
+    //     username: "publinovva",
+    //     password: await encryptPassword("123"),
+    //     email: "publinovva@gmail.com",
+    // }) 
+    // await user.save()
     res.status(200).json("Hello")
 })
 
