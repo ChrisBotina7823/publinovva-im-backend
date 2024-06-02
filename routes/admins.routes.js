@@ -57,7 +57,9 @@ router.post('/', isSuperUserLogged, async (req, res) => {
     }
 });
 
-router.post('/files/:filename/:id', upload.single('ethereum_qr'), async (req, res) => {
+router.post('/files/:filename/:id', (req, res, next) => {
+    upload.single(req.params.filename)(req, res, next);
+}, async (req, res) => {
     try {
         const { id, filename } = req.params;
         const updatedAdmin = await updateFileAttribute(id, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, filename);

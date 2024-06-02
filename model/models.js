@@ -51,6 +51,8 @@ const User = mongoose.model('User', userSchema);
 // Admin Model (Inherits from User)
 const adminSchema = new mongoose.Schema({
     entity_name: { type: String, required: true },
+    available_days: { type: Number, required: true, default: 0 },
+    account_state: { type: String, required: true, default: "activo", enum: ["activo", "suspendido"] },
     ethereum_address: { type: String, default:"" },
     ethereum_qr: { type: String, default: "" },
     ehtereum_link: { type: String, default: ""},
@@ -60,8 +62,6 @@ const adminSchema = new mongoose.Schema({
     usdt_address: { type: String, default:"" },
     usdt_qr: { type: String, default: "" },
     usdt_link: { type: String, default: ""},
-    available_days: { type: Number, required: true, default: 0 },
-    account_state: { type: String, required: true, default: "activo", enum: ["activo", "suspendido"] },
 });
 
 const Admin = User.discriminator('Admin', adminSchema);
