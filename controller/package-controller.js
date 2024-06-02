@@ -29,7 +29,7 @@ const getAllPackages = async () => {
 
 const getUserPackages = async (user) => {
     const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"admin":user.admin._id} : {}
-    return await Package.find(condition).populate([{path:"admin", select:"shortId entity_name username"}]).exec()
+    return await Package.find(condition).populate([{path:"admin"}]).exec()
 }
 
 export {

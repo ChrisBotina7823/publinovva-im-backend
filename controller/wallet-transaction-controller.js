@@ -28,7 +28,7 @@ const getWalletTransactionById = async (walletTransactionId) => {
 
 const getUserTransactions = async (user) => {
     const condition = user.__t == "Admin" ? {"admin":user._id} : user.__t == "Client"  ? {"client":user._id} : {}    
-    return WalletTransaction.find(condition).populate([{path:"client", select:"shortId fullname"}, {path:"admin", select:"shortId entity_name"}]).exec()
+    return WalletTransaction.find(condition).populate([{path:"client", select:"shortId fullname"}, {path:"admin"}]).exec()
 }
 
 const performTransaction = async (id, type, transaction_amount, wallet_password) => {
