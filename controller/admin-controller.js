@@ -33,6 +33,7 @@ const deleteAdmin = async (id) => {
         if(admin.profile_picture) await deleteFile(getIdFromUrl(admin.profile_picture))
         if(admin.btc_qr) await deleteFile(getIdFromUrl(admin.btc_qr))
         if(admin.ethereum_qr) await deleteFile(getIdFromUrl(admin.ethereum_qr))
+        if(admin.usdt_qr) await deleteFile(getIdFromUrl(admin.usdt_qr))
     } catch(err) {
         console.error(err)
     }

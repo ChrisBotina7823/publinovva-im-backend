@@ -53,8 +53,13 @@ const adminSchema = new mongoose.Schema({
     entity_name: { type: String, required: true },
     ethereum_address: { type: String, default:"" },
     ethereum_qr: { type: String, default: "" },
+    ehtereum_link: { type: String, default: ""},
     btc_address: { type: String, default:"" },
     btc_qr: { type: String, default: "" },
+    btc_link: { type: String, default: ""},
+    usdt_address: { type: String, default:"" },
+    usdt_qr: { type: String, default: "" },
+    usdt_link: { type: String, default: ""},
     available_days: { type: Number, required: true, default: 0 },
     account_state: { type: String, required: true, default: "activo", enum: ["activo", "suspendido"] },
 });

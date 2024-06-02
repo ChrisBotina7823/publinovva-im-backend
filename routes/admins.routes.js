@@ -57,23 +57,11 @@ router.post('/', isSuperUserLogged, async (req, res) => {
     }
 });
 
-router.post('/ethereum-qr/:id', upload.single('ethereum_qr'), async (req, res) => {
+router.post('/files/:filename/:id', upload.single('ethereum_qr'), async (req, res) => {
     try {
-        const { id } = req.params;
-        const updatedAdmin = await updateFileAttribute(id, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'ethereum_qr');
+        const { id, filename } = req.params;
+        const updatedAdmin = await updateFileAttribute(id, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, filename);
         console.log(updatedAdmin)
-        req.io.emit("adminsUpdate")
-        req.io.emit("usersUpdate")
-        res.status(200).json(updatedAdmin);
-    } catch (err) {
-        errorHandler(res, err);
-    }    
-})
-
-router.post('/btc-qr/:id', upload.single('btc_qr'), async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updatedAdmin = await updateFileAttribute(id, process.env.DRIVE_PROFILE_PICTURE_FOLDER, req.file, 'btc_qr');
         req.io.emit("adminsUpdate")
         req.io.emit("usersUpdate")
         res.status(200).json(updatedAdmin);
