@@ -67,6 +67,7 @@ router.get('/activate-account/:token', async (req, res) => {
         if(!user) throw new Error("Token de activación inválido")
         await updateUser(user._id, {suspended:false, recovery_token:""})
         sendEmail(user.admin.email, "Cuenta Activada", `El cliente ${user.fullname} ha activado su cuenta al verificaar el correo ${user.email}`)
+        sendEmail(user.email, "¡Bienvenido!", `Su cuenta ha sido activada con éxito. Puede ingresar a la plataforma`)
         res.status(200).json({message: "Cuenta activada con éxito, puede ingresar a la plataforma", admin:user.admin})
     } catch(err) {
         errorHandler(res, err)

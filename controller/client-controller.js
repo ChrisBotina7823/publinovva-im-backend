@@ -58,6 +58,9 @@ const insertClient = async (req, suspended=false) => {
     }
     const client = new Client(newClient);
     client.save();
+    if(!suspended) {
+        sendEmail(client.email, "¡Bienvenido!", `Su cuenta ha sido activada con éxito. Puede ingresar a la plataforma`)
+    }
     await assignWalletToClient(client, admin, usd_wallet, i_wallet)
     return client
 }
