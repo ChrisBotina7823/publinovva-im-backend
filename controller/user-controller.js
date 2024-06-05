@@ -46,7 +46,12 @@ const getUserById = async (id) => {
 }
 
 const getUserByRecoveryToken = async (recovery_token) => {
-    return await User.findOne({recovery_token}) 
+    const user = await User.findOne({recovery_token})
+    if(user?.__t && user.__t == "Client") {
+        const populateFields = [{path:"admin"}, {path:"usd_wallet"}, {path:"i_wallet"}]
+        await User.populate(user, populateFields);
+    }  
+    return user 
 }
 
 const updateFileAttribute = async (id, folderId, file, attribute) => {

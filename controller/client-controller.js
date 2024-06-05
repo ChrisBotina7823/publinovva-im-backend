@@ -51,6 +51,7 @@ const insertClient = async (req, suspended=false) => {
             "Activación de Cuenta",
             `Para activar tu cuenta ingresa al siguiente enlace:\n${recovery_link}`
         )
+        sendEmail(admin.email, "Nuevo Cliente Registrado", `El cliente ${newClient.fullname} (${newClient.username}) ha llenado el formulario de registro en el sistema`)
         if(!email_sent) {
             throw error("La dirección de correo electrónico no es válida")
         }
