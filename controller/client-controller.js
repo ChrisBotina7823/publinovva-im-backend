@@ -1,6 +1,7 @@
 import { deleteFile } from '../helpers/drive-upload.js';
 import { sendEmail } from '../helpers/email-manager.js';
 import { encryptPassword, generateToken } from '../helpers/encryption.js';
+import { boldStyle, welcomeMessage } from '../helpers/messages.js';
 import { getIdFromUrl } from '../helpers/object-depuration.js';
 import { Client, Investment, Movement, User, Wallet }  from '../model/models.js';
 import { getAdminById } from './admin-controller.js';
@@ -51,7 +52,7 @@ const insertClient = async (req, suspended=false) => {
             "Activación de Cuenta",
             `Para activar tu cuenta ingresa al siguiente enlace:\n${recovery_link}`
         )
-        sendEmail(admin.email, "Nuevo Cliente Registrado", `El cliente ${newClient.fullname} (${newClient.username}) ha llenado el formulario de registro en el sistema`)
+        sendEmail(admin.email, "Nuevo Cliente Registrado", `El cliente ${boldStyle(`${newClient.fullname} (${newClient.username})`)} ha llenado el formulario de registro en el sistema`)
         if(!email_sent) {
             throw error("La dirección de correo electrónico no es válida")
         }
@@ -59,7 +60,7 @@ const insertClient = async (req, suspended=false) => {
     const client = new Client(newClient);
     client.save();
     if(!suspended) {
-        sendEmail(client.email, "¡Bienvenido!", `Su cuenta ha sido activada con éxito. Puede ingresar a la plataforma`)
+        sendEmail(client.email, welcomeMessage(client).subject, welcomeMessage(client).description)
     }
     await assignWalletToClient(client, admin, usd_wallet, i_wallet)
     return client

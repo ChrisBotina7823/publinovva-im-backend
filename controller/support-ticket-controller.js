@@ -1,4 +1,5 @@
 import { sendEmail } from "../helpers/email-manager.js";
+import { boldStyle } from "../helpers/messages.js";
 import { SupportTicket } from "../model/models.js";
 import { getUserById } from "./user-controller.js";
 
@@ -37,8 +38,8 @@ const makeSupportTicket = async (id, description, category) => {
     
     
     const ticket = await insertSupportTicket(ticketInfo)
-    sendEmail(client.email, `Ticket de soporte. Solicitud ${ticket._id}`, `¡Hola! Con este ticket podrás seguir tu solicitud de servicio al cliente. Se te enviará un correo en cuanto tu administrador responda a la solicitud`)
-    sendEmail(admin.email, `Servicio al cliente ${ticket.category}.`, `El cliente identificado con usuario ${client.id} ha realizado una solicitud de servicio al cliente a la categoría ${ticket.category}. A continuación el mensaje:\n${ticket.description}`)
+    sendEmail(client.email, `Ticket de soporte. Solicitud ${ticket._id}`, `¡Hola! Con este ${boldStyle("ticket de soporte")} podrás seguir tu solicitud de servicio al cliente. Se te enviará un correo en cuanto tu administrador responda a la solicitud`)
+    sendEmail(admin.email, `Servicio al cliente ${ticket.category}.`, `El cliente identificado con usuario ${boldStyle(client.id) } ha realizado una solicitud de servicio al cliente a la categoría ${ticket.category}. A continuación el mensaje:<br>${ticket.description}`)
 
     return ticket
 }

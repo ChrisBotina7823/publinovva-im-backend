@@ -4,6 +4,7 @@ import { getWalletById, updateWalletById } from "./wallet-controller.js";
 import { checkPassword } from "../helpers/encryption.js"
 import { sendEmail } from "../helpers/email-manager.js";
 import { getUserById } from "./user-controller.js";
+import { boldStyle } from "../helpers/messages.js";
 
 // Insert a new wallet transaction (inherits from Movement)
 const insertWalletTransaction = async (walletTransactionJson) => {
@@ -87,9 +88,9 @@ const performTransaction = async (id, type, transaction_amount, wallet_password)
     }
 
 
-    const originInfo = origin_wallet ? `\n - Billetera origen: ${origin_wallet._id} (${origin_wallet.type})` : ""
-    const destInfo = dest_wallet ? `\n - Billetera destino: ${dest_wallet._id} (${dest_wallet.type})` : ""
-    const emailDesc = `Se ha realizado una solicitud de ${transactionType}\n - Cliente: ${client.username}\n - Monto: ${transaction_amount}${originInfo}${destInfo}`
+    const originInfo = origin_wallet ? `<br> - ${boldStyle("Billetera origen:")} ${origin_wallet._id} (${origin_wallet.type})` : ""
+    const destInfo = dest_wallet ? `<br> - ${boldStyle("Billetera destino:")} ${dest_wallet._id} (${dest_wallet.type})` : ""
+    const emailDesc = `Se ha realizado una solicitud de ${boldStyle(transactionType)}<br> - ${boldStyle("Cliente: ")} ${client.username}<br> - ${boldStyle("Monto: ")} ${transaction_amount}${originInfo}${destInfo}`
 
     if(type != 'usd-transfer' && type != 'inv-transfer') {
         sendEmail(client.email, `Solicitud de ${transactionType} realizada`, emailDesc)

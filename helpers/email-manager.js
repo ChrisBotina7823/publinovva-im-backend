@@ -12,12 +12,20 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendEmail = async (dest_email, subject, text) => {
+const sendEmail = async (dest_email, subject, html) => {
     const options = {
         from: from_email,
         to: dest_email,
-        subject,
-        text
+        subject: `${subject} - ${(new Date()).toLocaleString()}`,
+        html : `
+        <html>
+            <body>
+                <div style="font-family: Arial, sans-serif; font-size: 16px;">
+                    ${html}
+                </div>
+            </body>
+        </html>
+        `
     }
 
     try {

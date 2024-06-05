@@ -4,6 +4,7 @@ import { invalidPassword, userNotFound, suspendedUser } from '../helpers/excepti
 import { errorHandler } from '../middlewares/login-md.js'
 import { checkPassword } from '../helpers/encryption.js'
 import { sendEmail } from '../helpers/email-manager.js'
+import { boldStyle } from '../helpers/messages.js'
 config()
 
 const loginUser = async (req, res, getUser) => {
@@ -50,7 +51,7 @@ const loginUser = async (req, res, getUser) => {
             user.login_code = login_code;
             user.save();
             const blockEmail = process.env.PRODUCTION || false 
-            if(!blockEmail) sendEmail(user.email, "Código de inicio de sesión", `Tu código de inicio de sesión es: ${login_code}`);
+            if(!blockEmail) sendEmail(user.email, "Código de inicio de sesión", `Tu código de inicio de sesión es: ${boldStyle(login_code)}`);
             res.json({"login_code": login_code});
         } 
     } catch (err) {
