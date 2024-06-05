@@ -8,6 +8,7 @@ import { sendEmail } from '../helpers/email-manager.js';
 import { errorHandler } from '../middlewares/login-md.js';
 import { userNotFound } from '../helpers/exceptions.js';
 import { boldStyle, welcomeMessage } from '../helpers/messages.js';
+import { header } from '../helpers/html_templates/welcome-header.js';
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ router.get('/activate-account/:token', async (req, res) => {
         if(!user) throw new Error("Token de activación inválido")
         await updateUser(user._id, {suspended:false, recovery_token:""})
         sendEmail(user.admin.email, "Cuenta Activada", `El cliente ${boldStyle(user.fullname)} ha activado su cuenta al verificar el correo ${boldStyle(user.email)}`)
-        sendEmail(user.email, welcomeMessage(user).subject, welcomeMessage(user).description)
+        sendEmail(user.email, welcomeMessage(user).subject, welcomeMessage(user).description, header())
         res.status(200).json({message: "Cuenta activada con éxito, puede ingresar a la plataforma", admin:user.admin})
     } catch(err) {
         errorHandler(res, err)
