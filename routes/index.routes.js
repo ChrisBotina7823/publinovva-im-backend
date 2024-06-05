@@ -52,13 +52,13 @@ router.get('/', async (req, res) => {
     const admins = await Admin.find({})
     for(const admin of admins) {
         admin.ethereum_address = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)  
-        admin.ehtereum_link = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) 
+        admin.ethereum_link = "https://coinmarketcap.com/currencies/ethereum/"
         admin.ethereum_qr = "https://images.unsplash.com/photo-1709038459415-8379ce8ae789?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTcxNzM0OTk5MQ&ixlib=rb-4.0.3&q=80&w=200"
         admin.btc_address = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)   
-        admin.btc_link = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)  
+        admin.btc_link = "https://coinmarketcap.com/currencies/bitcoin/"
         admin.btc_qr = "https://images.unsplash.com/photo-1707400711977-328a8a52b416?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTcxNzM1MDAxOA&ixlib=rb-4.0.3&q=80&w=200"
         admin.usdt_address = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)  
-        admin.usdt_link = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) 
+        admin.usdt_link = "https://coinmarketcap.com/currencies/tether/"
         admin.usdt_qr = "https://images.unsplash.com/photo-1709777618320-c1c8548f3942?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTcxNzM1MDAyOA&ixlib=rb-4.0.3&q=80&w=200"
         await admin.save();
     }

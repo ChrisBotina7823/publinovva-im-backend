@@ -55,7 +55,7 @@ const adminSchema = new mongoose.Schema({
     account_state: { type: String, required: true, default: "activo", enum: ["activo", "suspendido"] },
     ethereum_address: { type: String, default:"" },
     ethereum_qr: { type: String, default: "" },
-    ehtereum_link: { type: String, default: ""},
+    ethereum_link: { type: String, default: ""},
     btc_address: { type: String, default:"" },
     btc_qr: { type: String, default: "" },
     btc_link: { type: String, default: ""},
@@ -72,7 +72,7 @@ const clientSchema = new mongoose.Schema({
     fullname: { type: String, required: true },
     country: { type: String, required: true },
     phone: { type: String, required: true },
-    account_state: { type: String, required: true, default: "en revision", enum: ["en revision", "activo", "suspendido"] },
+    account_state: { type: String, required: true, default: "activo", enum: ["en revision", "activo", "suspendido"] },
     i_wallet: { type: mongoose.Schema.Types.ObjectId, ref: 'Wallet' },
     usd_wallet: { type: mongoose.Schema.Types.ObjectId, ref: 'Wallet' },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }
