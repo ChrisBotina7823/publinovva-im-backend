@@ -1,5 +1,5 @@
 import express from "express";
-import { beginInvestment, calculateRevenue, generateInvestmentReport, getAllInvestments, getClientRevenueTable, getInvestmentById, getUserInvestments, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
+import { beginInvestment, calculateRevenue, generateInvestmentReport, getAllInvestments, getInvestmentById, getUserInvestments, updateInvestment, updateInvestmentState } from "../controller/investment-controller.js";
 import { errorHandler, isAdminLogged } from "../middlewares/login-md.js";
 import { getUserById } from "../controller/user-controller.js";
 
@@ -38,10 +38,11 @@ router.get('/:id', async (req, res) => {
 
 router.get('/revenues/:id', async (req, res) => {
     try {
-        const { id } = req.params
-        const client = await getUserById(id)
-        const revenues = await getClientRevenueTable(client._id)
-        res.status(200).json(revenues)
+        // const { id } = req.params
+        // const client = await getUserById(id)
+        // const revenues = await getClientRevenueTable(client._id)
+        // res.status(200).json(revenues)
+        res.status(200).json({})
     } catch(err) {
         errorHandler(res, err)
     }
@@ -85,7 +86,13 @@ router.post('/change-state/:id', isAdminLogged, async (req, res) => {
 router.put('/:id', isAdminLogged, async (req, res) => {
     try {
         const { id } = req.params
-        const { actual_start_date, end_date, state = undefined } = req.body
+        let { actual_start_date, end_date, state = undefined, time } = req.body
+        const investment = await getInvestmentById(id)
+        actual_start_date = new Date(actual_start_date)
+        end_date = new Date(end_date)
+        time = new Date(time)
+        actual_start_date.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds())
+        end_date.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds())
         const investmentInfo = {
             actual_start_date,
             end_date

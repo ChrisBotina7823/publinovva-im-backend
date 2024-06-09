@@ -102,7 +102,7 @@ const performTransaction = async (id, type, transaction_amount, wallet_password)
 
 const approveTransaction = async (id, received_amount) => {
     const transaction = await WalletTransaction.findById(id)
-        .populate([{path:"origin_wallet dest_wallet", select:"shortId available_amount"}])
+        .populate([{path:"origin_wallet dest_wallet", select:"shortId available_amount"}, {path:"client"}])
         .exec()
     if(transaction.transaction_type == "withdrawal") {
         const { origin_wallet } = transaction
@@ -110,9 +110,11 @@ const approveTransaction = async (id, received_amount) => {
             throw new Error(`La billetera ${origin_wallet._id} no tiene los suficientes fondos para el retiro`)
         }
         await updateWalletById(origin_wallet, {available_amount: origin_wallet.available_amount - received_amount})
+        sendEmail(transaction.client.email, `Retiro de billetera USD aprobado`, `Se ha aprobado el retiro de ${received_amount} USD de su billetera`)
     } else {
         const { dest_wallet } = transaction
         await updateWalletById(dest_wallet, {available_amount: dest_wallet.available_amount + received_amount})
+        sendEmail(transaction.client.email, `Deposito a billetera USD aprobado`, `Se ha aprobado el depósito de ${received_amount} USD a su billetera`)
     }
 
     return await WalletTransaction.findByIdAndUpdate(id, {movement_state:"resuelto", received_amount: received_amount})

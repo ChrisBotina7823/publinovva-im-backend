@@ -15,7 +15,6 @@ const statePhase = {
 
 // Insert a new investment
 const insertInvestment = async (investmentJson) => {
-    console.log(investmentJson.package)
     const investment = new Investment(investmentJson);
     return await investment.save();
 }
@@ -79,16 +78,29 @@ const beginInvestment = async (id, end_date, package_id, inv_amount ) => {
     if(inv_amount < inv_package.min_opening_amount) throw new Error(`El monto es menor al requerido por el paquete ${inv_package.name}. Monto Mínimo: $${inv_package.min_opening_amount} `)
     investmentInfo.inv_amount = inv_amount
 
-    investmentInfo.end_date = new Date(end_date)
     const currentDate = new Date();
-    currentDate.setUTCHours(0, 0, 0, 0);
+    end_date = new Date(end_date)
+    end_date.setUTCHours(currentDate.getUTCHours(), currentDate.getUTCMinutes(), currentDate.getUTCSeconds(), currentDate.getUTCMilliseconds());
+    investmentInfo.end_date = end_date
     const dayDiff = differenceInDays( investmentInfo.end_date, currentDate )
     if(dayDiff < inv_package.min_inv_days) throw new Error(`El paquete ${inv_package.name} requiere ${inv_package.min_inv_days} días de inversión mínimo`)
 
-    console.log(investmentInfo)
     const investment = await insertInvestment(investmentInfo)
-    console.log(admin.email)
-    sendEmail(client.email, "Solicitud de Inversión", "¡Hola! Tu solicitud de inversión se ha realizado correctamente. Se notificará al administrador para que responda a tu solicitud")
+    const clientMessage = `
+    Hola ${client.fullname},<br>
+    Tu solicitud de inversión ha sido recibida con éxito. A continuación, los detalles de tu inversión:<br>
+    <ul>
+        <li>Paquete: ${inv_package.name}</li>
+        <li>Monto: $${inv_amount}</li>
+        <li> Porcentaje de beneficio: ${inv_package.revenue_percentage}%</li>
+        <li> Frecuencia de ingreso: Cada ${inv_package.revenue_freq} día(s)</li>
+        <li>Fecha de inicio: ${currentDate.toISOString().split("T")[0]}</li>
+        <li>Fecha de finalización: ${investmentInfo.end_date.toISOString().split("T")[0]}</li>
+        </ul>
+        <br>
+        <p>Recuerda que puedes revisar el estado de tu inversión en cualquier momento en la plataforma.</p>
+    `
+    sendEmail(client.email, "Solicitud de Inversión", clientMessage)
     sendEmail(admin.email, "Solicitud de Inversión", `El cliente identificado con usuario ${client.username} ha realizado una solicitud de inversión. Revisa la plataforma para evaluar la solicitud`)
 
     return investment
@@ -103,18 +115,46 @@ const updateInvestmentState = async (id, state) => {
     if(investment.state == state) throw new Error(`El estado ${id} ya está  ${state}`)
     if( statePhase[investment.state] > statePhase[state] ) throw new Error(`No es posible cambiar el estado de "${investment.state}" a "${state}"`)
 
+    let clientMessage
     switch(state) {
         case "en curso":
             updateWalletById(wallet._id, {available_amount: wallet.available_amount - investment.inv_amount, actual_start_date: Date.now})
             invInfo.actual_start_date = Date.now() 
             break
         case "finalizado":
+            clientMessage = `
+            Hola ${investment.client.fullname},<br>
+            Tu inversión ha finalizado con éxito. A continuación, los detalles de tu inversión:<br>
+            <ul>
+                <li> Ingreso total: $${(await calculateRevenue(investment)).total_revenue}</li>
+                <li>Paquete: ${investment.package.name}</li>
+                <li>Monto: $${investment.inv_amount}</li>
+                <li> Porcentaje de beneficio: ${investment.package.revenue_percentage}%</li>
+                <li> Frecuencia de ingreso: Cada ${investment.package.revenue_freq} día(s)</li>
+                <li>Fecha de inicio: ${investment.actual_start_date.toISOString().split("T")[0]}</li>
+                <li>Fecha de finalización: ${investment.end_date.toISOString().split("T")[0]}</li>
+            </ul>
+            <br>
+            <p>Recuerda que puedes revisar el estado de tu inversión en cualquier momento en la plataforma.</p>`
+            sendEmail(investment.client.email, "Inversión Finalizada", clientMessage)
             updateWalletById(wallet._id, {available_amount: wallet.available_amount + investment.inv_amount + (await calculateRevenue(investment)).total_revenue })
             break
         case "rechazado":
+            clientMessage = `
+            Hola ${investment.client.fullname},<br>
+            Tu solicitud de inversión ha sido rechazada. Se reembolsará el monto de tu inversión a tu billetera de inversión.<br>
+            <ul>
+                <li>Monto: $${investment.inv_amount}</li>
+                <li>Fecha de solicitud: ${investment.start_date.toISOString().split("T")[0]}</li>
+            </ul>
+            <br>
+            <p>Recuerda que puedes revisar el estado de tu inversión en cualquier momento en la plataforma.</p>`
+            sendEmail(investment.client.email, "Solicitud de Inversión Rechazada", clientMessage)
+                
             if(investment.state == "en curso") {
                 updateWalletById(wallet._id, {available_amount: wallet.available_amount + investment.inv_amount})
             }
+            
             break
         default:
             throw new Error(`Insert a valid state for investments`)
@@ -130,12 +170,9 @@ const calculateRevenue = async (investment) => {
     const revenues = [];
     const start_date = new Date(investment.actual_start_date || investment.start_date);
     const curr_date = new Date();
-    curr_date.setUTCHours(0, 0, 0, 0);
-    start_date.setUTCHours(0, 0, 0, 0);
     const end_date = Math.min(new Date(investment.end_date), curr_date);
     const freq = investment.package.revenue_freq
     for(let day = new Date(start_date); day <= end_date; day.setDate(day.getDate() + 1)) {
-        day.setUTCHours(0, 0, 0, 0)
         const days_diff = differenceInDays(day, start_date)
         if(days_diff && days_diff % freq == 0) {
             const revenue = investment.inv_amount * (investment.package.revenue_percentage / 100);
@@ -149,47 +186,47 @@ const calculateRevenue = async (investment) => {
     }
 }
 
-const getClientRevenueTable = async (id) => {
-    const investments = await Investment.find({client:id})
-        .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"shortId revenue_percentage revenue_freq"}])
-        .exec()
-    const revenueTables = await Promise.all(investments.map(calculateRevenueTable));
-    return revenueTables.flat();
-}
+// const getClientRevenueTable = async (id) => {
+//     const investments = await Investment.find({client:id})
+//         .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"shortId revenue_percentage revenue_freq"}])
+//         .exec()
+//     const revenueTables = await Promise.all(investments.map(calculateRevenueTable));
+//     return revenueTables.flat();
+// }
 
-const calculateRevenueTable = (investment) => {
-    if (!investment.actual_start_date || investment.state == 'pendiente' == investment.state == "rechazado") return [];
+// const calculateRevenueTable = (investment) => {
+//     if (!investment.actual_start_date || investment.state == 'pendiente' == investment.state == "rechazado") return [];
 
-    const revenueTable = [];
-    const { inv_amount, actual_start_date, end_date } = investment;
-    const { revenue_percentage, revenue_freq } = investment.package
+//     const revenueTable = [];
+//     const { inv_amount, actual_start_date, end_date } = investment;
+//     const { revenue_percentage, revenue_freq } = investment.package
 
 
-    const currentDate = new Date(actual_start_date);
-    currentDate.setUTCHours(0,0,0,0)
+//     const currentDate = new Date(actual_start_date);
+//     currentDate.setUTCHours(0,0,0,0)
 
-    const endDate = new Date(end_date)
-    endDate.setUTCHours(0,0,0,0)
+//     const endDate = new Date(end_date)
+//     endDate.setUTCHours(0,0,0,0)
 
-    const revenue_amount = inv_amount * (revenue_percentage / 100);
+//     const revenue_amount = inv_amount * (revenue_percentage / 100);
 
-    const todayDate = new Date()
-    todayDate.setUTCHours(0, 0, 0, 0);
+//     const todayDate = new Date()
+//     todayDate.setUTCHours(0, 0, 0, 0);
 
-    while (currentDate <= endDate && currentDate <= todayDate) {
-        const days_diff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
-        revenueTable.push({
-            date: currentDate.toISOString(),
-            days_diff,
-            revenue_amount,
-            investment: investment.shortId || investment._id
-        });
+//     while (currentDate <= endDate && currentDate <= todayDate) {
+//         const days_diff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
+//         revenueTable.push({
+//             date: currentDate.toISOString(),
+//             days_diff,
+//             revenue_amount,
+//             investment: investment.shortId || investment._id
+//         });
 
-        currentDate.setDate(currentDate.getDate() + revenue_freq);
-    }
+//         currentDate.setDate(currentDate.getDate() + revenue_freq);
+//     }
 
-    return revenueTable;
-};
+//     return revenueTable;
+// };
 
 const isValid = investment => {
     return investment.package && investment.state != "pendiente" && investment.state != "rechazado"
@@ -204,15 +241,12 @@ const generateInvestmentReport = async (id) => {
     const investments = await getUserInvestments(client)
     let total_invested = 0, total_revenue = 0;
     const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
     for(const investment of investments) {
         if(!isValid(investment)) continue; // Skip if the investment is invalid
         const start_date = new Date(investment.actual_start_date || investment.start_date);
-        start_date.setUTCHours(0, 0, 0, 0);
         const end_date =  Math.min( new Date(investment.end_date), today );
 
         const freq = investment.package.revenue_freq
-        console.log(new Date(end_date))
         const days_diff = differenceInDays(end_date, start_date)
         const revenue_days = Math.floor(days_diff / freq)
         total_invested += investment.inv_amount
@@ -221,7 +255,8 @@ const generateInvestmentReport = async (id) => {
     let daily_revenue = Array(7).fill(0);
     let day_idx = Array(7).fill(0);
     for(let i = 6; i >= 0; i--) { // Loop over the last 7 days
-        const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i + 1);
+        const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        day.setHours(today.getHours(), today.getMinutes(), today.getSeconds(), today.getMilliseconds());
         day_idx[6 - i] = day.getDay();
 
         for(const investment of investments) {
@@ -231,9 +266,7 @@ const generateInvestmentReport = async (id) => {
             if(investment.end_date < day) continue; // Skip if the investment has ended
             const freq = investment.package.revenue_freq
 
-            const end_days = toDays(day)
-            const start_days = toDays(start_date)
-            const days_diff = end_days - start_days
+            const days_diff = differenceInDays(day, start_date)
             if( days_diff && days_diff % freq == 0 ) {
                 const revenue = investment.inv_amount * (investment.package.revenue_percentage / 100);
                 daily_revenue[6 - i] += revenue;
@@ -261,7 +294,7 @@ export {
     getAllInvestments,
     beginInvestment,
     updateInvestmentState,
-    getClientRevenueTable,
+    // getClientRevenueTable,
     getUserInvestments,
     generateInvestmentReport,
     calculateRevenue
