@@ -33,7 +33,7 @@ const deleteInvestment = async (investmentId) => {
 
 // Get investment by ID
 const getInvestmentById = async (investmentId) => {
-    const inv = await Investment.findById(investmentId).populate([{path:"client", select:"shortId fullname"}, {path:"package", select:"shortId name revenue_freq revenue_percentage"}]).exec();
+    const inv = await Investment.findById(investmentId).populate([{path:"client"}, {path:"package"}]).exec();
     return inv
 }
 
@@ -186,47 +186,6 @@ const calculateRevenue = async (investment) => {
     }
 }
 
-// const getClientRevenueTable = async (id) => {
-//     const investments = await Investment.find({client:id})
-//         .populate([{path:"wallet", select:"investment_amount"}, {path:"package", select:"shortId revenue_percentage revenue_freq"}])
-//         .exec()
-//     const revenueTables = await Promise.all(investments.map(calculateRevenueTable));
-//     return revenueTables.flat();
-// }
-
-// const calculateRevenueTable = (investment) => {
-//     if (!investment.actual_start_date || investment.state == 'pendiente' == investment.state == "rechazado") return [];
-
-//     const revenueTable = [];
-//     const { inv_amount, actual_start_date, end_date } = investment;
-//     const { revenue_percentage, revenue_freq } = investment.package
-
-
-//     const currentDate = new Date(actual_start_date);
-//     currentDate.setUTCHours(0,0,0,0)
-
-//     const endDate = new Date(end_date)
-//     endDate.setUTCHours(0,0,0,0)
-
-//     const revenue_amount = inv_amount * (revenue_percentage / 100);
-
-//     const todayDate = new Date()
-//     todayDate.setUTCHours(0, 0, 0, 0);
-
-//     while (currentDate <= endDate && currentDate <= todayDate) {
-//         const days_diff = Math.floor((currentDate - actual_start_date) / (1000 * 60 * 60 * 24));
-//         revenueTable.push({
-//             date: currentDate.toISOString(),
-//             days_diff,
-//             revenue_amount,
-//             investment: investment.shortId || investment._id
-//         });
-
-//         currentDate.setDate(currentDate.getDate() + revenue_freq);
-//     }
-
-//     return revenueTable;
-// };
 
 const isValid = investment => {
     return investment.package && investment.state != "pendiente" && investment.state != "rechazado"
@@ -286,6 +245,25 @@ const generateInvestmentReport = async (id) => {
     }
 }
 
+const checkInvestments = async () => {
+    // console.log("Checking investments")
+    const investments = await Investment.find({state: "en curso"}).exec();
+    const today = new Date();
+    const updatePromises = [];
+
+    for(const investment of investments) {
+        const end_date = new Date(investment.end_date);
+        if(end_date < today) {
+            console.log("finished")
+            updatePromises.push(updateInvestmentState(investment._id, "finalizado"));
+        } else {
+            console.log("not finished")
+        }
+    }
+
+    await Promise.all(updatePromises);
+}
+
 export {
     insertInvestment,
     updateInvestment,
@@ -294,8 +272,8 @@ export {
     getAllInvestments,
     beginInvestment,
     updateInvestmentState,
-    // getClientRevenueTable,
     getUserInvestments,
     generateInvestmentReport,
-    calculateRevenue
+    calculateRevenue,
+    checkInvestments
 }

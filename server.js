@@ -51,6 +51,7 @@ app.use('/auth/', authRouter);
 // the following routes require the user to be authenticated
 import { isUserLogged, parseUsernameMD } from "./middlewares/login-md.js";
 import { getAllClients } from "./controller/client-controller.js";
+import { checkInvestments } from "./controller/investment-controller.js";
 app.use(isUserLogged);
 
 app.use('/users/', usersRouter);
@@ -69,6 +70,10 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
+
+setInterval( async () => {
+    await checkInvestments();
+}, 60*60*1000)
 
 // Set server to port
 server.listen(PORT, () => {
