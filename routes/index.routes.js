@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     const elements = await User.find({})
     const header = "https://drive.lienuc.com/uc?id="
     for(const e of elements) {
-        let newAttr = e.profile_picture.replace(header, "https://publinovva-im-backend-production.up.railway.app")
+        let newAttr = e.profile_picture.replace(header, "https://publinovva-im-backend-production.up.railway.app/img/")
         console.log(newAttr)
     }
     res.status(200).json("Hello")
