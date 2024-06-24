@@ -5,7 +5,7 @@ import { getAdminByUsername } from '../controller/admin-controller.js'
 import { getAllUsers, getUserByUsername, updateUser } from '../controller/user-controller.js'
 import { sendEmail } from '../helpers/email-manager.js'
 import upload from '../helpers/multer-config.js'
-import { uploadFile } from '../helpers/drive-upload.js'
+import { getFileById, uploadFile } from '../helpers/drive-upload.js'
 import { config } from 'dotenv'
 import {
     User,
@@ -93,5 +93,16 @@ router.post('/', upload.single('profile_picture'), async (req, res) => {
     await upload.deleteFile(profile_picture.path)
     res.status(200).json({message:"file uploaded correctly"})
 })
+
+router.get('/img/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { stream, mimeType } = await getFileById(id);
+        res.setHeader('Content-Type', mimeType);
+        stream.pipe(res);
+    } catch(err) {
+        errorHandler(res, err);
+    }
+});
 
 export default router

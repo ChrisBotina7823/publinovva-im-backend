@@ -118,6 +118,24 @@ const deleteFolderAndContents = async (folderId) => {
 };
 
 
+const getFileById = async (fileId) => {
+    try {
+        const metadata = await drive.files.get({
+            fileId: fileId,
+            fields: 'mimeType',
+        });
+        const mimeType = metadata.data.mimeType;
+        const stream = await drive.files.get({
+            fileId: fileId,
+            alt: 'media',
+        }, { responseType: 'stream' });
+        return { stream: stream.data, mimeType };
+    } catch (err) {
+        console.error(err);
+    }
+
+}
+
 export {
     uploadFile,
     uploadMultipleFiles,
@@ -125,5 +143,6 @@ export {
     deleteFile,
     getFilesInFolder,
     renameFolder,
-    deleteFolderAndContents
+    deleteFolderAndContents,
+    getFileById
 };
