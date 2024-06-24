@@ -25,13 +25,25 @@ import { getWalletInvestments } from '../controller/wallet-controller.js'
 import { getAllPackages } from '../controller/package-controller.js'
 config()
 
-router.get('/', async (req, res) => {
-    const elements = await User.find({})
+const updateFileAttr = async () => {
     const header = "https://drive.lienuc.com/uc?id="
+    const newHeader = "https://publinovva-im-backend-production.up.railway.app/img/"
+    let elements = await User.find({})
     for(const e of elements) {
-        let newAttr = e.profile_picture.replace(header, "https://publinovva-im-backend-production.up.railway.app/img/")
-        console.log(newAttr)
+        e.profile_picture = e.profile_picture.replace(header, newHeader)
+        e.save()
     }
+    elements = await Admin.find({})
+    for(const e of elements) {
+        e.ethereum_qr = e.ethereum_qr.replace(header, newHeader)
+        e.btc_qr = e.btc_qr.replace(header, newHeader)
+        e.usdt_qr = e.usdt_qr.replace(header, newHeader)
+        e.save()
+    }
+}
+
+router.get('/', async (req, res) => {
+    await updateFileAttr()
     res.status(200).json("Hello")
 })
 

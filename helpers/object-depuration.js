@@ -16,7 +16,7 @@ const getIdFromUrl = (url) => {
 }
 
 const getUrlFromId = (fileId) => {
-  return `https://drive.lienuc.com/uc?id=${fileId}`
+  return `https://publinovva-im-backend-production.up.railway.app/img/${fileId}`
 }
 
 const checkObj = (obj, prototype) => {
