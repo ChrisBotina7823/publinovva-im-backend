@@ -58,7 +58,7 @@ const insertClient = async (req, suspended=false) => {
         }
     }
     const client = new Client(newClient);
-    client.save();
+    await client.save();
     if(!suspended) {
         sendEmail(client.email, welcomeMessage(client).subject, welcomeMessage(client).description)
     }
