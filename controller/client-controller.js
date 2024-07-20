@@ -60,7 +60,7 @@ const insertClient = async (req, suspended=false) => {
     const client = new Client(newClient);
     await client.save();
     if(!suspended) {
-        sendEmail(client.email, welcomeMessage(client).subject, welcomeMessage(client).description)
+        sendEmail(client.email, "¡Bienvenido!", welcomeMessage(client))
     }
     await assignWalletToClient(client, admin, usd_wallet, i_wallet)
     return client

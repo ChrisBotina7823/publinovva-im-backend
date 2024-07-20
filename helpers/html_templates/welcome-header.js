@@ -91,7 +91,7 @@ const template = (message, showBtn = false) => {
               <td align="left" style="padding:0;Margin:0;width:560px">
               <table width="100%" cellspacing="0" cellpadding="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                 <tr>
-                  <td align="center" style="padding:0;Margin:0;font-size:0px"><img class="adapt-img" src="https://ibb.co/jZ72ZRV" alt="" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" width="560"></td>
+                  <td align="center" style="padding:0;Margin:0;font-size:0px"><img class="adapt-img" src="https://iili.io/dnVXOZX.th.jpg" alt="" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" width="560"></td>
                 </tr>
               </table></td>
             </tr>
