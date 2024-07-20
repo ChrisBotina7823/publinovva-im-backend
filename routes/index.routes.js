@@ -43,7 +43,7 @@ const updateFileAttr = async () => {
 }
 
 router.get('/', async (req, res) => {
-    await updateFileAttr()
+    // await updateFileAttr()
     res.status(200).json("Hello")
 })
 
