@@ -6,7 +6,7 @@ const welcomeMessage = (client, adminData = null) => {
   const message = `
   Estimado/a <b>${client.fullname}</b> ,<br><br>¡Bienvenido/a a <b>Capital Trade</b>!
    👋 👋 👋&nbsp;&nbsp;Nos complace tenerte como parte de nuestra comunidad. A continuación, te presentamos algunos detalles sobre los beneficios que ofrecemos:
-  <br><br>1.🎁 <b>Bono de Bienvenida</b>: Al unirte a Capital Trade, recibirás un bono de <b>20 USDT</b>&nbsp;como agradecimiento por unirte a nosotros.
+  <br><br>1.🎁 <b>Bono de Bienvenida</b>: Al unirte a Capital Trade, obtendrás un <b>50% extra</b>&nbsp; en tu primera inversión como agradecimiento por unirte a nosotros.
   <br><br>2.💹 <b>Beneficios Diarios</b>: Disfruta de un <b>3% de beneficios diarios</b>&nbsp;en tus inversiones. Nuestro equipo trabaja arduamente para garantizar que obtengas el máximo rendimiento posible.
   <br><br>3.💰 <b>Comisiones Más Bajas del Mercado</b>: Disfruta de las tarifas más competitivas para maximizar tus ganancias.
   <br><br>4.✈️ <b>Retiros Rápidos en Todo el Mundo</b>: Procesamos tus retiros de manera eficiente, sin importar dónde te encuentres.
